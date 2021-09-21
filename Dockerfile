@@ -8,7 +8,7 @@ RUN apk add -y --no-cache py3-pip python3-dev git
 RUN git clone https://github.com/podio/podio-py.git
 RUN cd podio-py && python setup.py install
 
-RUN pip install --no-cache-dir mysql-connector-python pywhatkit
+RUN pip install --no-cache-dir mysql-connector-python pywhatkit selenium
 
 ADD podio_api.py /opt/podio_api/podio_api.py
 

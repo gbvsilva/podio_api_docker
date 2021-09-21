@@ -278,6 +278,10 @@ if __name__ == '__main__':
     username = os.environ['PODIO_USERNAME']
     password = os.environ['PODIO_PASSWORD']
 
+    currentPath = __file__.split("podio_api.py")[0] 
+    driverPath = currentPath + r"chromedriver.exe" 
+    driver = webdriver.Chrome(driverPath)
+
     #print(client_id, client_secret, username, password)
 
     message = "==== PODIO API PYTHON SCRIPT ===="
