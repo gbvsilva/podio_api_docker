@@ -5,7 +5,7 @@ from pypodio2 import api
 
 import mysql.connector
 import time, datetime
-import pywhatkit as kit
+import requests
 
 def get_all_workspaces(podio, twilio):
     # Obtendo informações de todas as organizações que o usuário tem acesso no Podio
@@ -14,13 +14,12 @@ def get_all_workspaces(podio, twilio):
         # Obtendo todas as workspaces que o usuário tem acesso
         hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
         message = f"{hour.strftime('%H:%M:%S')} -> Sucesso na obtenção das orgs."
-        kit.sendwhatmsg_instantly(os.environ['WHATSAPP_TO'], message, hour.hour, hour.minute+3)
+        requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_TOKEN']}/sendMessage", data={'text': message})
         print(message)
         return podio.Space.find_all_for_org(orgs[0]['org_id'])
     except api.transport.TransportException as err:
         hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
         message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado ao obter orgs. "+err
-        kit.sendwhatmsg_instantly(os.environ['WHATSAPP_TO'], message, hour.hour, hour.minute+3)
         print(message)
 
 # Rotina para a criação inicial do banco de dados MySQL.
@@ -42,12 +41,10 @@ def create_tables(podio, cursor, twilio):
                     cursor.execute(q)
                     hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                     message = f"{hour.strftime('%H:%M:%S')} -> Banco `"+db_name+"` criado."
-                    kit.sendwhatmsg_instantly(os.environ['WHATSAPP_TO'], message, hour.hour, hour.minute+3)
                     print(message)
                 except mysql.connector.Error as err:
                     hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                     message = f"{hour.strftime('%H:%M:%S')} -> Erro na criação do BD. "+err
-                    kit.sendwhatmsg_instantly(os.environ['WHATSAPP_TO'], message, hour.hour, hour.minute+3)
                     print(message)
 
             # Criando as tabelas para cada database criado acima
@@ -85,30 +82,30 @@ def create_tables(podio, cursor, twilio):
                             cursor.execute("".join(query))
                             hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                             message = f"{hour.strftime('%H:%M:%S')} -> "+"".join(query)
-                            twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+                            
                             print(message)
                         # Caso tabela esteja inativa no Podio, excluí-la
                         elif app.get('status') != "active" and (table_name,) in tables:
                             cursor.execute("DROP TABLE "+table_name)
                             hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                             message = f"{hour.strftime('%H:%M:%S')} -> Tabela inativa `"+table_name+"` excluída."
-                            twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+                            
                             print(message)
                 except mysql.connector.Error as err:
                     hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                     message = f"{hour.strftime('%H:%M:%S')} -> Erro no acesso ao BD. "+err
-                    twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+                    
                     print(message)
                 except api.transport.TransportException as err:
                     if 'x-rate-limit-remaining' in err.status and err.status['x-rate-limit-remaining'] == '0':
                         hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                         message = f"{hour.strftime('%H:%M:%S')} -> Quantidade de requisições chegou ao limite por hora. "+err
-                        twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+                        
                         print(message)
                         return 2
                     hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                     message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado na requisição para a API. "+err
-                    twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+                    
                     print(message)
                     return 1
         return 0
@@ -156,7 +153,7 @@ def insert_items(podio, cursor, twilio):
                             if dbcount < number_of_items:
                                 hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                                 message = f"{hour.strftime('%H:%M:%S')} -> {table_name} tem {str(dbcount)} itens no BD e {str(number_of_items)} no Podio."
-                                twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+                                
                                 print(message)
                                 # Caso não seja possível inserir items em novas inspeções é necessário excluir a tabela
                                 # recadastrando os dados no Banco
@@ -226,13 +223,13 @@ def insert_items(podio, cursor, twilio):
                                                 cursor.execute("".join(query))
                                                 hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                                                 message = f"{hour.strftime('%H:%M:%S')} -> "+"".join(query)
-                                                twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+                                                
                                                 print(message)
                                                 mydb.commit()
                                             except mysql.connector.Error as err:
                                                 hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                                                 message = f"{hour.strftime('%H:%M:%S')} -> Aplicativo alterado. Excluindo a tabela `{table_name}`. {err}"
-                                                twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+                                                
                                                 print(message)
                                                 cursor.execute("DROP TABLE "+table_name)
                                                 return 1
@@ -240,13 +237,13 @@ def insert_items(podio, cursor, twilio):
                                     if err.status['status'] == '504':
                                         hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                                         message = f"{hour.strftime('%H:%M:%S')} -> Servidor demorou muito para responder. {err}"
-                                        twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+                                        
                                         print(message)
                                         return 1
                                     elif 'x-rate-limit-remaining' in err.status and err.status['x-rate-limit-remaining'] == '0':
                                         hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                                         message = f"{hour.strftime('%H:%M:%S')} -> Quantidade de requisições chegou ao limite por hora. {err}"
-                                        twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+                                        
                                         print(message)
                                         return 2
 
@@ -254,18 +251,18 @@ def insert_items(podio, cursor, twilio):
                     if err.status['status'] == '504':
                         hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                         message = f"{hour.strftime('%H:%M:%S')} -> Servidor demorou muito para responder. {err}"
-                        twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+                        
                         print(message)
                         return 1
                     elif 'x-rate-limit-remaining' in err.status and err.status['x-rate-limit-remaining'] == '0':
                         hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                         message = f"{hour.strftime('%H:%M:%S')} -> Quantidade de requisições chegou ao limite por hora. {err}"
-                        twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+                        
                         print(message)
                         return 2
                     hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                     message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado na requisição para a API. {err}"
-                    twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+                    
                     print(message)
                     return 1
         return 0
@@ -282,8 +279,9 @@ if __name__ == '__main__':
 
     message = "==== PODIO API PYTHON SCRIPT ===="
     hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
-    kit.sendwhatmsg(os.environ['WHATSAPP_TO'], message, hour.hour, hour.minute+3)
+    requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_TOKEN']}/sendMessage", data={'text': message, 'chat_id': "@gbvsilva"})
     print(message)
+    input()
     try:
         # Autenticando na plataforma do Podio com as credenciais recuperadas acima
         podio = api.OAuthClient(
@@ -296,12 +294,12 @@ if __name__ == '__main__':
     except api.transport.TransportException as err:
         hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
         message = f"{hour.strftime('%H:%M:%S')} -> Erro no acesso a API. {err}"
-        twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+        
         print(message)
         if 'error_detail' in err.content and err.content['error_detail'] == 'oauth.invalid_secret':
             hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
             message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido. Terminando o programa."
-            twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+            
             print(message)
         exit(1)
     else:
@@ -319,14 +317,14 @@ if __name__ == '__main__':
         except mysql.connector.Error as err:
             hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
             message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado no acesso ao BD. Terminando o programa. {err}"
-            twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+            
             print(message)
             exit(1)
         else:
             cycle = 1
             while True:
                 message = f"==== Ciclo {str(cycle)} ===="
-                twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+                
                 print(message)
                 res = create_tables(podio, cursor, twilio)
                 if res == 0:
@@ -335,7 +333,7 @@ if __name__ == '__main__':
                     if result == 2:
                         hour = datetime.datetime.now() + datetime.timedelta(hours=-2)
                         message = f"Esperando a hora seguinte às {hour.strftime('%H:%M:%S')}"
-                        twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+                        
                         print(message)
                         time.sleep(3600)
                     elif result == 0:
@@ -343,24 +341,24 @@ if __name__ == '__main__':
                         now = datetime.datetime.now()
                         tomorrow = now + datetime.timedelta(days=1, hours=-3)
                         message = f"Esperando o dia seguinte às {tomorrow.strftime('%H:%M:%S')}"
-                        twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+                        
                         print(message)
                         time.sleep(86400)
                     else:
                         message = "Tentando novamente..."
-                        twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+                        
                         print(message)
                         time.sleep(1)
                 elif res == 2:
                     hour = datetime.datetime.now() + datetime.timedelta(hours=-2)
                     message = f"Esperando a hora seguinte às {hour.strftime('%H:%M:%S')}"
-                    twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+                    
                     print(message)
                     time.sleep(3600)
                 else:
                     hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                     message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado na criação/atualização do BD. Terminando programa."
-                    twilio['client'].messages.create(body=message, from_=twilio['from_number'], to=twilio['to_number'])
+                    
                     print(message)
                     exit(1)
                 cycle += 1
