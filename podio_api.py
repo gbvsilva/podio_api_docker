@@ -1,4 +1,3 @@
-#!/bin/sh
 import os
 # Usando a biblioteca de manipulação da API do Podio.
 from pypodio2 import api
