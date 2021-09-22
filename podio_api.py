@@ -337,13 +337,13 @@ if __name__ == '__main__':
                         print(message)
                         time.sleep(3600)
                     elif result == 0:
-                        # Nesse caso foi criado o primeiro snapshot do Podio no BD. Próxima iteração no dia seguinte
+                        # Nesse caso foi criado o primeiro snapshot do Podio no BD. Próxima iteração nas próximas 12 horas.
                         now = datetime.datetime.now()
-                        tomorrow = now + datetime.timedelta(days=1, hours=-3)
-                        message = f"Esperando o dia seguinte às {tomorrow.strftime('%H:%M:%S')}"
+                        hours = now + datetime.timedelta(hours=9)
+                        message = f"Esperando as próximas 12hs às {hours.strftime('%H:%M:%S')}"
                         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                         print(message)
-                        time.sleep(86400)
+                        time.sleep(43200)
                     else:
                         message = "Tentando novamente..."
                         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
