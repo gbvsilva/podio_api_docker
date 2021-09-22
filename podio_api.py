@@ -20,7 +20,7 @@ def get_all_workspaces(podio):
     except api.transport.TransportException as err:
         hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
         message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado ao obter orgs. "+err
-        
+        requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
         print(message)
 
 # Rotina para a criação inicial do banco de dados MySQL.
