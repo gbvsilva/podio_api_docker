@@ -18,7 +18,13 @@ def get_all_workspaces(podio):
         return podio.Space.find_all_for_org(orgs[0]['org_id'])
     except api.transport.TransportException as err:
         hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
-        message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado ao obter orgs. "+err
+        message = ""
+        if err.status['status'] == '401':
+            message = f"{hour.strftime('%H:%M:%S')} -> Token expirado. {err}"
+        elif err.status['status'] == '400':
+            message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido. {err}"
+        else:
+            message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado na obtenção das orgs. {err}"
         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
         print(message)
 
@@ -40,12 +46,12 @@ def create_tables(podio, cursor):
                 try:
                     cursor.execute(q)
                     hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
-                    message = f"{hour.strftime('%H:%M:%S')} -> Banco `"+db_name+"` criado."
+                    message = f"{hour.strftime('%H:%M:%S')} -> Banco `{db_name}` criado."
                     requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                     print(message)
                 except mysql.connector.Error as err:
                     hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
-                    message = f"{hour.strftime('%H:%M:%S')} -> Erro na criação do BD. "+err
+                    message = f"{hour.strftime('%H:%M:%S')} -> Erro na criação do BD. {err}"
                     requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                     print(message)
 
@@ -83,30 +89,35 @@ def create_tables(podio, cursor):
                             #print(table_name)
                             cursor.execute("".join(query))
                             hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
-                            message = f"{hour.strftime('%H:%M:%S')} -> "+"".join(query)
+                            message = f"{hour.strftime('%H:%M:%S')} -> {''.join(query)}"
                             requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                             print(message)
                         # Caso tabela esteja inativa no Podio, excluí-la
                         elif app.get('status') != "active" and (table_name,) in tables:
                             cursor.execute("DROP TABLE "+table_name)
                             hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
-                            message = f"{hour.strftime('%H:%M:%S')} -> Tabela inativa `"+table_name+"` excluída."
+                            message = f"{hour.strftime('%H:%M:%S')} -> Tabela inativa `{table_name}` excluída."
                             requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                             print(message)
                 except mysql.connector.Error as err:
                     hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
-                    message = f"{hour.strftime('%H:%M:%S')} -> Erro no acesso ao BD. "+err
+                    message = f"{hour.strftime('%H:%M:%S')} -> Erro no acesso ao BD. {err}"
                     requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                     print(message)
                 except api.transport.TransportException as err:
-                    if 'x-rate-limit-remaining' in err.status and err.status['x-rate-limit-remaining'] == '0':
-                        hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
-                        message = f"{hour.strftime('%H:%M:%S')} -> Quantidade de requisições chegou ao limite por hora. "+err
+                    hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                    if 'x-rate-limit-remaining' in err.status and err.status['x-rate-limit-remaining'] == '0':  
+                        message = f"{hour.strftime('%H:%M:%S')} -> Quantidade de requisições chegou ao limite por hora. {err}"
                         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                         print(message)
                         return 2
-                    hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
-                    message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado na requisição para a API. "+err
+                    message = ""
+                    if err.status['status'] == '401':
+                        message = f"{hour.strftime('%H:%M:%S')} -> Token expirado. {err}"
+                    elif err.status['status'] == '400':
+                        message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido. {err}"
+                    else:
+                        message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado na requisição para a API. {err}"
                     requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                     print(message)
                     return 1
@@ -224,7 +235,7 @@ def insert_items(podio, cursor):
                                             try:
                                                 cursor.execute("".join(query))
                                                 hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
-                                                message = f"{hour.strftime('%H:%M:%S')} -> "+"".join(query)
+                                                message = f"{hour.strftime('%H:%M:%S')} -> {''.join(query)}"
                                                 requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                                                 print(message)
                                                 mydb.commit()
@@ -296,7 +307,7 @@ if __name__ == '__main__':
         message = f"{hour.strftime('%H:%M:%S')} -> Erro no acesso a API. {err}"
         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
         print(message)
-        if 'error_detail' in err.content and err.content['error_detail'] == 'oauth.invalid_secret':
+        if err.status['status'] == '400':
             hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
             message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido. Terminando o programa."
             requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
@@ -357,7 +368,7 @@ if __name__ == '__main__':
                     time.sleep(3600)
                 else:
                     hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
-                    message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado na criação/atualização do BD. Terminando programa."
+                    message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado na criação/atualização do BD. Terminando o programa."
                     requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                     print(message)
                     exit(1)
