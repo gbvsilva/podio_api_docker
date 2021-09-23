@@ -4,7 +4,7 @@ from pypodio2 import api
 
 import mysql.connector
 import time, datetime
-import requests
+import requests, json
 
 def get_all_workspaces(podio):
     # Obtendo informações de todas as organizações que o usuário tem acesso no Podio
@@ -21,7 +21,7 @@ def get_all_workspaces(podio):
         message = ""
         if err.status['status'] == '401':
             message = f"{hour.strftime('%H:%M:%S')} -> Token expirado. {err}"
-        elif err.status['status'] == '400':
+        elif err.status['status'] == '400' and json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':
             message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido. {err}"
         else:
             message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado na obtenção das orgs. {err}"
@@ -114,7 +114,7 @@ def create_tables(podio, cursor):
                     message = ""
                     if err.status['status'] == '401':
                         message = f"{hour.strftime('%H:%M:%S')} -> Token expirado. {err}"
-                    elif err.status['status'] == '400':
+                    elif err.status['status'] == '400' and json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':
                         message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido. {err}"
                     else:
                         message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado na requisição para a API. {err}"
@@ -307,7 +307,7 @@ if __name__ == '__main__':
         message = f"{hour.strftime('%H:%M:%S')} -> Erro no acesso a API. {err}"
         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
         print(message)
-        if err.status['status'] == '400':
+        if err.status['status'] == '400' and json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':
             hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
             message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido. Terminando o programa."
             requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
@@ -327,7 +327,7 @@ if __name__ == '__main__':
             cursor = mydb.cursor()
         except mysql.connector.Error as err:
             hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
-            message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado no acesso ao BD. Terminando o programa. {err}"
+            message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado no acesso inicial ao BD. Terminando o programa. {err}"
             requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
             print(message)
             exit(1)
