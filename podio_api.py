@@ -57,6 +57,7 @@ def create_tables(podio, cursor):
                     message = f"{hour.strftime('%H:%M:%S')} -> Erro na criação do BD. {err}"
                     requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                     print(message)
+                    return 1
 
             # Criando as tabelas para cada database criado acima
             cursor.execute("SHOW DATABASES")
@@ -301,11 +302,10 @@ if __name__ == '__main__':
 
     #print(client_id, client_secret, username, password)
     message = "==== PODIO API PYTHON SCRIPT ===="
-    hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
     requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
     print(message)
+    # Autenticando na plataforma do Podio com as credenciais recuperadas acima
     try:
-        # Autenticando na plataforma do Podio com as credenciais recuperadas acima
         podio = api.OAuthClient(
             client_id,
             client_secret,
