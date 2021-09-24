@@ -271,6 +271,13 @@ def insert_items(podio, cursor):
                                         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                                         print(message)
                                         return 2
+                            elif dbcount > number_of_items:
+                                hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                                message = f"{hour.strftime('%H:%M:%S')} -> Itens excluídos do Podio. Excluindo a tabela `{table_name}` do BD e recriando-a."
+                                requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
+                                print(message)
+                                cursor.execute("DROP TABLE " + table_name)
+                                return 1
 
                 except api.transport.TransportException as err:
                     if err.status['status'] == '504':
