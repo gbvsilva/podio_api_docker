@@ -20,7 +20,13 @@ def get_all_workspaces(podio):
         hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
         message = ""
         if err.status['status'] == '401':
-            message = f"{hour.strftime('%H:%M:%S')} -> Token expirado. {err}"
+            message = f"{hour.strftime('%H:%M:%S')} -> Token expirado. Renovando..."
+            podio = api.OAuthClient(
+                env.get('PODIO_CLIENT_ID'),
+                env.get('PODIO_CLIENT_SECRET'),
+                env.get('PODIO_PASSWORD'),
+                env.get('PODIO_USERNAME')
+            )
         elif err.status['status'] == '400' and json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':
             message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido. {err}"
         else:
@@ -37,14 +43,11 @@ def create_tables(podio, cursor):
         # Verificando se as workspaces ja estão armazenadas no BD como databases. Se não, executar a criação
         cursor.execute("SHOW DATABASES")
         databases = cursor.fetchall()
-        create_db_queries = []
         for w in workspaces:
             db_name = w.get('url_label').replace("-", "_")
             if (db_name,) not in databases:
-                create_db_queries.append("CREATE DATABASE " + db_name)
-            for q in create_db_queries:
                 try:
-                    cursor.execute(q)
+                    cursor.execute("CREATE DATABASE " + db_name)
                     hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                     message = f"{hour.strftime('%H:%M:%S')} -> Banco `{db_name}` criado."
                     requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
@@ -56,6 +59,8 @@ def create_tables(podio, cursor):
                     print(message)
 
             # Criando as tabelas para cada database criado acima
+            cursor.execute("SHOW DATABASES")
+            databases = cursor.fetchall()
             if (db_name,) in databases:
                 cursor.execute("USE "+db_name)
                 try:
@@ -113,7 +118,13 @@ def create_tables(podio, cursor):
                         return 2
                     message = ""
                     if err.status['status'] == '401':
-                        message = f"{hour.strftime('%H:%M:%S')} -> Token expirado. {err}"
+                        message = f"{hour.strftime('%H:%M:%S')} -> Token expirado. Renovando..."
+                        podio = api.OAuthClient(
+                            env.get('PODIO_CLIENT_ID'),
+                            env.get('PODIO_CLIENT_SECRET'),
+                            env.get('PODIO_PASSWORD'),
+                            env.get('PODIO_USERNAME')
+                        )
                     elif err.status['status'] == '400' and json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':
                         message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido. {err}"
                     else:
