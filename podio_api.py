@@ -22,10 +22,10 @@ def get_all_workspaces(podio):
         if err.status['status'] == '401':
             message = f"{hour.strftime('%H:%M:%S')} -> Token expirado. Renovando..."
             podio = api.OAuthClient(
-                env.get('PODIO_CLIENT_ID'),
-                env.get('PODIO_CLIENT_SECRET'),
-                env.get('PODIO_PASSWORD'),
-                env.get('PODIO_USERNAME')
+                os.environ['PODIO_CLIENT_ID'],
+                os.environ['PODIO_CLIENT_SECRET'],
+                os.environ['PODIO_PASSWORD'],
+                os.environ['PODIO_USERNAME']
             )
         elif err.status['status'] == '400' and json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':
             message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido. {err}"
@@ -121,10 +121,10 @@ def create_tables(podio, cursor):
                     if err.status['status'] == '401':
                         message = f"{hour.strftime('%H:%M:%S')} -> Token expirado. Renovando..."
                         podio = api.OAuthClient(
-                            env.get('PODIO_CLIENT_ID'),
-                            env.get('PODIO_CLIENT_SECRET'),
-                            env.get('PODIO_PASSWORD'),
-                            env.get('PODIO_USERNAME')
+                            os.environ['PODIO_CLIENT_ID'],
+                            os.environ['PODIO_CLIENT_SECRET'],
+                            os.environ['PODIO_PASSWORD'],
+                            os.environ['PODIO_USERNAME']
                         )
                     elif err.status['status'] == '400' and json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':
                         message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido. {err}"
