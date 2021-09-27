@@ -87,9 +87,9 @@ def create_tables(podio, cursor):
                             table_labels = []
                             for field in app_info.get('fields'):
                                 if field['status'] == "active":
-                                    label = field['label'].strip()
+                                    label = field['label']
                                     # Alguns campos possuem nomes muito grandes
-                                    label = label[:40]
+                                    label = label[:40].strip()
                                     if f"`{label}`".lower() in "".join(query).lower():
                                         label += str("".join(query).lower().count(f"`{label}`".lower())+1)
                                     query.append(f", `{label}` VARCHAR(255)")
@@ -174,8 +174,8 @@ def insert_items(podio, cursor):
                             table_labels = []
                             for field in app_info.get('fields'):
                                 if field['status'] == "active":
-                                    label = field['label'].strip()
-                                    label = label[:40]
+                                    label = field['label']
+                                    label = label[:40].strip()
                                     table_labels.append("`" + label + "`")
 
                             # Fazendo requisicoes percorrendo todos os dados existentes
@@ -209,7 +209,7 @@ def insert_items(podio, cursor):
                                             # print(fields)
                                             while i < len(table_labels):
                                                 s = ""
-                                                if j < len(fields) and str("`" + fields[j]['label'][:40] + "`").strip().lower() == table_labels[i].lower():
+                                                if j < len(fields) and str("`" + fields[j]['label'][:40].strip() + "`").lower() == table_labels[i].lower():
                                                     # print(str("`" + fields[j]['label'][:40] + "`").lower(), table_labels[i].lower())
                                                     # De acordo com o tipo do campo há uma determinada forma de recuperar esse dado
                                                     if fields[j]['type'] == "contact":
