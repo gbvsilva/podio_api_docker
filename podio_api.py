@@ -118,7 +118,7 @@ def create_tables(podio, cursor):
                     hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                     message = ""
                     if 'x-rate-limit-remaining' in err.status and err.status['x-rate-limit-remaining'] == '0':  
-                        message = f"{hour.strftime('%H:%M:%S')} -> Quantidade de requisições chegou ao limite por hora. {err}"
+                        message = f"{hour.strftime('%H:%M:%S')} -> Quantidade de requisições chegou ao limite por hora."
                         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                         print(message)
                         return 2
