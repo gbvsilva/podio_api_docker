@@ -24,8 +24,8 @@ def get_all_workspaces(podio):
             podio = api.OAuthClient(
                 os.environ['PODIO_CLIENT_ID'],
                 os.environ['PODIO_CLIENT_SECRET'],
-                os.environ['PODIO_PASSWORD'],
-                os.environ['PODIO_USERNAME']
+                os.environ['PODIO_USERNAME'],
+                os.environ['PODIO_PASSWORD']
             )
         elif err.status['status'] == '400' and json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':
             message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido. {err}"
@@ -74,7 +74,7 @@ def create_tables(podio, cursor):
                         #print(app)
                         table_name = app.get('url_label').replace('-', '_')
                         if app.get('status') == "active" and (table_name,) not in tables:
-                            print(table_name)
+                            #print(table_name)
                             app_info = podio.Application.find(app.get('app_id'))
                             # print(app_info)
                             query = ["CREATE TABLE " + table_name, "("]
@@ -123,8 +123,8 @@ def create_tables(podio, cursor):
                         podio = api.OAuthClient(
                             os.environ['PODIO_CLIENT_ID'],
                             os.environ['PODIO_CLIENT_SECRET'],
-                            os.environ['PODIO_PASSWORD'],
-                            os.environ['PODIO_USERNAME']
+                            os.environ['PODIO_USERNAME'],
+                            os.environ['PODIO_PASSWORD']
                         )
                     elif err.status['status'] == '400' and json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':
                         message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido. {err}"
