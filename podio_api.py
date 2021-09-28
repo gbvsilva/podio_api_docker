@@ -28,6 +28,7 @@ def get_all_workspaces(podio):
                 os.environ['PODIO_USERNAME'],
                 os.environ['PODIO_PASSWORD']
             )
+            return "token_expirado"
         elif err.status['status'] == '400': 
             if json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':    
                 message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido."    
@@ -131,6 +132,7 @@ def create_tables(podio, cursor):
                             os.environ['PODIO_USERNAME'],
                             os.environ['PODIO_PASSWORD']
                         )
+                        return 3
                     elif err.status['status'] == '400': 
                         if json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':    
                             message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido."    
@@ -142,6 +144,8 @@ def create_tables(podio, cursor):
                     print(message)
                     return 1
         return 0
+    elif workspaces == 'token_expirado':
+        return 3
     return 1
 
 # Inserindo dados no Banco. Retorna 0 se nao ocorreram erros
@@ -394,6 +398,11 @@ if __name__ == '__main__':
                     requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                     print(message)
                     time.sleep(3600)
+                elif res == 3:
+                    message = "Tentando novamente..."
+                    requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
+                    print(message)
+                    time.sleep(1)
                 else:
                     hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                     message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado na criação/atualização do BD. Terminando o programa."
