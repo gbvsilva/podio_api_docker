@@ -28,6 +28,7 @@ def get_all_workspaces(podio):
                 os.environ['PODIO_USERNAME'],
                 os.environ['PODIO_PASSWORD']
             )
+            requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
             return "token_expirado"
         if err.status['status'] == '400': 
             if json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':    
@@ -152,7 +153,7 @@ def create_tables(podio, cursor):
 def insert_items(podio, cursor):
     workspaces = get_all_workspaces(podio)
     if workspaces == 'token_expirado':
-        return 3
+        return 1
     if type(workspaces) is list:
         cursor.execute("SHOW DATABASES")
         databases = cursor.fetchall()
