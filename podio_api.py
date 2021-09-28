@@ -45,7 +45,7 @@ def create_tables(podio, cursor):
     workspaces = get_all_workspaces(podio)
     if workspaces == 'token_expirado':
         return 3
-    elif type(workspaces) is list:
+    if type(workspaces) is list:
         # Verificando se as workspaces ja estão armazenadas no BD como databases. Se não, executar a criação
         cursor.execute("SHOW DATABASES")
         databases = cursor.fetchall()
@@ -153,7 +153,7 @@ def insert_items(podio, cursor):
     workspaces = get_all_workspaces(podio)
     if workspaces == 'token_expirado':
         return 3
-    elif type(workspaces) is list:
+    if type(workspaces) is list:
         cursor.execute("SHOW DATABASES")
         databases = cursor.fetchall()
         #print(databases)
