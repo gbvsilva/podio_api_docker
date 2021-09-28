@@ -29,7 +29,7 @@ def get_all_workspaces(podio):
                 os.environ['PODIO_PASSWORD']
             )
             return "token_expirado"
-        elif err.status['status'] == '400': 
+        if err.status['status'] == '400': 
             if json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':    
                 message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido."    
             elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.username':    
@@ -46,7 +46,7 @@ def create_tables(podio, cursor):
     workspaces = get_all_workspaces(podio)
     if workspaces == 'token_expirado':
         return 3
-    elif type(workspaces) is dict:
+    elif type(workspaces) is list:
         # Verificando se as workspaces ja estão armazenadas no BD como databases. Se não, executar a criação
         cursor.execute("SHOW DATABASES")
         databases = cursor.fetchall()
@@ -154,7 +154,7 @@ def insert_items(podio, cursor):
     workspaces = get_all_workspaces(podio)
     if workspaces == 'token_expirado':
         return 3
-    elif type(workspaces) is dict:
+    elif type(workspaces) is list:
         cursor.execute("SHOW DATABASES")
         databases = cursor.fetchall()
         #print(databases)
