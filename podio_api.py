@@ -367,6 +367,7 @@ if __name__ == '__main__':
         #print(workspaces)
         try:
             # Acessando o BD para armazenar os dados das workspaces nele
+            # Porta padrão do MySQL 3306
             mydb = mysql.connector.connect(
                 host=os.environ['MYSQL_HOST'],
                 user=os.environ['MYSQL_USERNAME'],
