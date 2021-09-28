@@ -29,6 +29,7 @@ def get_all_workspaces(podio):
                 os.environ['PODIO_PASSWORD']
             )
             requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
+            print(message)
             return "token_expirado"
         if err.status['status'] == '400': 
             if json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':    
