@@ -36,6 +36,10 @@ def get_all_workspaces(podio):
                 message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido."    
             elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.username':    
                 message = f"{hour.strftime('%H:%M:%S')} -> Usuário inválido."
+            elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_id':  
+                message = f"{hour.strftime('%H:%M:%S')} -> ID do cliente inválido." 
+            elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.password':    
+                message = f"{hour.strftime('%H:%M:%S')} -> Senha do cliente inválido."
         else:
             message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado na obtenção das orgs. {err}"
         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
@@ -88,7 +92,7 @@ def create_tables(podio, cursor):
                             query = ["CREATE TABLE " + table_name, "("]
                             query.append("`id` INTEGER PRIMARY KEY NOT NULL")
                             query.append(", `created_on` DATETIME")
-                            table_labels = []
+                            #table_labels = []
                             for field in app_info.get('fields'):
                                 if field['status'] == "active":
                                     label = field['label']
@@ -97,7 +101,7 @@ def create_tables(podio, cursor):
                                     if f"`{label}`".lower() in "".join(query).lower():
                                         label += str("".join(query).lower().count(f"`{label}`".lower())+1)
                                     query.append(f", `{label}` VARCHAR(255)")
-                                    table_labels.append("`"+label+"`")
+                                    #table_labels.append("`"+label+"`")
                             query.append(")")
 
                             #print(table_name)
@@ -134,12 +138,18 @@ def create_tables(podio, cursor):
                             os.environ['PODIO_USERNAME'],
                             os.environ['PODIO_PASSWORD']
                         )
+                        requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
+                        print(message)
                         return 3
                     if err.status['status'] == '400': 
                         if json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':    
                             message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido."    
                         elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.username':    
                             message = f"{hour.strftime('%H:%M:%S')} -> Usuário inválido."
+                        elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_id':  
+                            message = f"{hour.strftime('%H:%M:%S')} -> ID do cliente inválido." 
+                        elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.password':    
+                            message = f"{hour.strftime('%H:%M:%S')} -> Senha do cliente inválido."
                     else:
                         message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado na requisição para a API. {err}"
                     requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
@@ -209,55 +219,44 @@ def insert_items(podio, cursor):
                                             fields = item['fields']
                                             # Fazendo a comparação entre os campos existentes e os preenchidos
                                             # Caso o campo esteja em branco no Podio, preencher com '?'
-                                            i = 0
                                             j = 0
-                                            # print(table_labels)
-                                            # print(fields)
-                                            while i < len(table_labels):
-                                                s = ""
+                                            for i in range(len(table_labels)):
+                                                s = "\""
                                                 if j < len(fields) and str("`" + fields[j]['label'][:40].strip() + "`").lower() == table_labels[i].lower():
-                                                    # print(str("`" + fields[j]['label'][:40] + "`").lower(), table_labels[i].lower())
                                                     # De acordo com o tipo do campo há uma determinada forma de recuperar esse dado
                                                     if fields[j]['type'] == "contact":
-                                                        s += "\""
                                                         # Nesse caso o campo é multivalorado, então concatena-se com um pipe '|'
                                                         # Podem haver aspas duplas inseridas no valor do campo. Substituir com aspas simples
                                                         for elem in fields[j]['values']:
                                                             s += elem['value']['name'].replace("\"", "'") + "|"
                                                         s = s[:-1]
                                                     elif fields[j]['type'] == "category":
-                                                        s += "\"" + fields[j]['values'][0]['value']['text'].replace("\"", "'")
+                                                        s += fields[j]['values'][0]['value']['text'].replace("\"", "'")
                                                     elif fields[j]['type'] == "date" or fields[j]['type'] == "calculation" and 'start' in \
                                                             fields[j]['values'][0]:
-                                                        s += "\"" + fields[j]['values'][0]['start']
+                                                        s += fields[j]['values'][0]['start']
                                                     elif fields[j]['type'] == "money":
-                                                        s += "\"" + fields[j]['values'][0]['currency'] + " " + fields[j]['values'][0]['value']
+                                                        s += fields[j]['values'][0]['currency'] + " " + fields[j]['values'][0]['value']
                                                     elif fields[j]['type'] == "image":
-                                                        s += "\"" + fields[j]['values'][0]['value']['link']
+                                                        s += fields[j]['values'][0]['value']['link']
                                                     elif fields[j]['type'] == "embed":
-                                                        s += "\"" + fields[j]['values'][0]['embed']['url']
+                                                        s += fields[j]['values'][0]['embed']['url']
                                                     elif fields[j]['type'] == "app":
                                                         # Nesse caso o campo é multivalorado, então concatena-se com um pipe '|'
-                                                        s += "\""
                                                         for val in fields[j]['values']:
                                                             s += val['value']['title'].replace("\"", "'") + "|"
                                                         s = s[:-1]
                                                     else:
                                                         value = str(fields[j]['values'][0]['value'])
-                                                        if "\"" in value:
-                                                            s += "\"" + value.replace("\"", "'")
-                                                        else:
-                                                            s += "\"" + value
+                                                        s += value.replace("\"", "'")
                                                     s += "\""
                                                     j += 1
                                                 else:
-                                                    s += "\"?\""
-                                                i += 1
+                                                    s += "?\""
                                                 query.append(s)
                                                 query.append(",")
                                             query.pop()
                                             query.append(")")
-
                                             try:
                                                 cursor.execute("".join(query))
                                                 hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
@@ -287,6 +286,8 @@ def insert_items(podio, cursor):
                                             os.environ['PODIO_USERNAME'],
                                             os.environ['PODIO_PASSWORD']
                                         )
+                                        requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
+                                        print(message)
                                         return 1
                                     if 'x-rate-limit-remaining' in err.status and err.status['x-rate-limit-remaining'] == '0':
                                         message = f"{hour.strftime('%H:%M:%S')} -> Quantidade de requisições chegou ao limite por hora."
@@ -354,10 +355,14 @@ if __name__ == '__main__':
         hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
         message = ""   
         if err.status['status'] == '400':   
-            if json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':    
-                message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido. Terminando o programa." 
-            elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.username':    
+            if json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':
+                message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido. Terminando o programa."
+            elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.username':
                 message = f"{hour.strftime('%H:%M:%S')} -> Usuário inválido. Terminando o programa."
+            elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_id':
+                message = f"{hour.strftime('%H:%M:%S')} -> ID do cliente inválido. Terminando o programa."
+            elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.password':
+                message = f"{hour.strftime('%H:%M:%S')} -> Senha do cliente inválido. Terminando o programa."
         else:   
             message = f"{hour.strftime('%H:%M:%S')} -> Terminando o programa. Erro no acesso a API. {err}"
         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
