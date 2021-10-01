@@ -18,7 +18,7 @@ def get_all_workspaces(podio):
         return podio.Space.find_all_for_org(orgs[0]['org_id'])
     except api.transport.TransportException as err:
         hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
-        message = ""
+        #message = ""
         if err.status['status'] == '401':
             # Token expirado. Re-autenticando
             message = f"{hour.strftime('%H:%M:%S')} -> Token expirado. Renovando..."
@@ -31,15 +31,26 @@ def get_all_workspaces(podio):
             requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
             print(message)
             return "token_expirado"
-        if err.status['status'] == '400': 
-            if json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':    
+        if err.status['status'] == '400':
+            if json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':
                 message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido."    
-            elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.username':    
+            elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.username':
                 message = f"{hour.strftime('%H:%M:%S')} -> Usuário inválido."
-            elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_id':  
+            elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_id':
                 message = f"{hour.strftime('%H:%M:%S')} -> ID do cliente inválido." 
-            elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.password':    
+            elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.password':
                 message = f"{hour.strftime('%H:%M:%S')} -> Senha do cliente inválido."
+            else:   
+                message = f"{hour.strftime('%H:%M:%S')} -> Parâmetro nulo na query."    
+                podio = api.OAuthClient(    
+                    os.environ['PODIO_CLIENT_ID'],
+                    os.environ['PODIO_CLIENT_SECRET'],
+                    os.environ['PODIO_USERNAME'],
+                    os.environ['PODIO_PASSWORD']
+                )
+                requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
+                print(message)
+                return "query_nula"
         else:
             message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado na obtenção das orgs. {err}"
         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
@@ -49,7 +60,7 @@ def get_all_workspaces(podio):
 # Recebe a variável autenticada na API Podio e o cursor do BD.
 def create_tables(podio, cursor):
     workspaces = get_all_workspaces(podio)
-    if workspaces == 'token_expirado':
+    if workspaces == 'token_expirado' or workspaces == 'query_nula':
         return 3
     if type(workspaces) is list:
         # Verificando se as workspaces ja estão armazenadas no BD como databases. Se não, executar a criação
@@ -66,10 +77,9 @@ def create_tables(podio, cursor):
                     print(message)
                 except mysql.connector.Error as err:
                     hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
-                    message = f"{hour.strftime('%H:%M:%S')} -> Erro na criação do BD. {err}"
+                    message = f"{hour.strftime('%H:%M:%S')} -> Erro na criação do BD `{db_name}`. {err}"
                     requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                     print(message)
-                    return 1
 
             # Criando as tabelas para cada database criado acima
             cursor.execute("SHOW DATABASES")
@@ -98,8 +108,8 @@ def create_tables(podio, cursor):
                                     label = field['label']
                                     # Alguns campos possuem nomes muito grandes
                                     label = label[:40].strip()
-                                    if f"`{label}`".lower() in "".join(query).lower():
-                                        label += str("".join(query).lower().count(f"`{label}`".lower())+1)
+                                    if f"`{label}".lower() in "".join(query).lower():
+                                        label += str("".join(query).lower().count(f"`{label}".lower())+1)
                                     query.append(f", `{label}` VARCHAR(255)")
                                     #table_labels.append("`"+label+"`")
                             query.append(")")
@@ -124,7 +134,7 @@ def create_tables(podio, cursor):
                     print(message)
                 except api.transport.TransportException as err:
                     hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
-                    message = ""
+                    #message = ""
                     if 'x-rate-limit-remaining' in err.status and err.status['x-rate-limit-remaining'] == '0':  
                         message = f"{hour.strftime('%H:%M:%S')} -> Quantidade de requisições chegou ao limite por hora."
                         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
@@ -141,29 +151,44 @@ def create_tables(podio, cursor):
                         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                         print(message)
                         return 3
-                    if err.status['status'] == '400': 
-                        if json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':    
+                    if err.status['status'] == '400':
+                        if json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':
                             message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido."    
-                        elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.username':    
+                        elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.username':
                             message = f"{hour.strftime('%H:%M:%S')} -> Usuário inválido."
-                        elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_id':  
-                            message = f"{hour.strftime('%H:%M:%S')} -> ID do cliente inválido." 
-                        elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.password':    
+                        elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_id':
+                            message = f"{hour.strftime('%H:%M:%S')} -> ID do cliente inválido."
+                        elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.password':
                             message = f"{hour.strftime('%H:%M:%S')} -> Senha do cliente inválido."
+                        else:       
+                            message = f"{hour.strftime('%H:%M:%S')} -> Parâmetro nulo na query."        
+                            podio = api.OAuthClient(        
+                                env.get('PODIO_CLIENT_ID'),
+                                env.get('PODIO_CLIENT_SECRET'),
+                                env.get('PODIO_USERNAME'),
+                                env.get('PODIO_PASSWORD')
+                            )
+                            requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
+                            print(message)  
+                            return 3
                     else:
                         message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado na requisição para a API. {err}"
                     requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                     print(message)
-                    return 1
+                    #return 1
+                    # Não parando o fluxo
+                    return 3
         return 0
-    return 1
+    #return 1
+    # Não parando o fluxo
+    return 3
 
 # Inserindo dados no Banco. Retorna 0 se nao ocorreram erros
 # Retorna 1 caso precise refazer a estrutura do Banco, excluindo alguma(s) tabela(s).
 # Retorna 2 caso seja atingido o limite de requisições por hora
 def insert_items(podio, cursor):
     workspaces = get_all_workspaces(podio)
-    if workspaces == 'token_expirado':
+    if workspaces == 'token_expirado' or workspaces == 'query_nula':
         return 1
     if type(workspaces) is list:
         cursor.execute("SHOW DATABASES")
@@ -210,19 +235,19 @@ def insert_items(podio, cursor):
                                     for step in range(dbcount, number_of_items, 500):
                                         # O valor padrão do offset é 0 de acordo com a documentação da API.
                                         # Ordenando de forma crescente da data de criação para unificar a estruturação do BD.
-                                        items_filtered = podio.Item.filter(app_info.get('app_id'), {"offset": step, "sort_by": "created_on", "sort_desc": False, "limit": 500})
-                                        items = items_filtered.get('items')
+                                        filtered_items = podio.Item.filter(app_info.get('app_id'), {"offset": step, "sort_by": "created_on", "sort_desc": False, "limit": 500})
+                                        items = filtered_items.get('items')
                                         for item in items:
                                             query = ["INSERT INTO " + table_name, " VALUES", "("]
                                             query.extend([str(item['item_id']), ",", "\"" + str(item['created_on']) + "\"", ","])
 
-                                            fields = item['fields']
+                                            fields = [x for x in item['fields'] if f"`{x['label'][:40].strip()}`" in table_labels]
                                             # Fazendo a comparação entre os campos existentes e os preenchidos
                                             # Caso o campo esteja em branco no Podio, preencher com '?'
                                             j = 0
                                             for i in range(len(table_labels)):
                                                 s = "\""
-                                                if j < len(fields) and str("`" + fields[j]['label'][:40].strip() + "`").lower() == table_labels[i].lower():
+                                                if j < len(fields) and str("`" + fields[j]['label'][:40].strip() + "`") == table_labels[i]:
                                                     # De acordo com o tipo do campo há uma determinada forma de recuperar esse dado
                                                     if fields[j]['type'] == "contact":
                                                         # Nesse caso o campo é multivalorado, então concatena-se com um pipe '|'
@@ -289,6 +314,26 @@ def insert_items(podio, cursor):
                                         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                                         print(message)
                                         return 1
+                                    if err.status['status'] == '400':   
+                                        if json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':    
+                                            message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido."    
+                                        elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.username':    
+                                            message = f"{hour.strftime('%H:%M:%S')} -> Usuário inválido."   
+                                        elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_id':  
+                                            message = f"{hour.strftime('%H:%M:%S')} -> ID do cliente inválido." 
+                                        elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.password':    
+                                            message = f"{hour.strftime('%H:%M:%S')} -> Senha do cliente inválido."  
+                                        else:
+                                            message = f"{hour.strftime('%H:%M:%S')} -> Parâmetro nulo na query."
+                                            podio = api.OAuthClient(
+                                                os.environ['PODIO_CLIENT_ID'],
+                                                os.environ['PODIO_CLIENT_SECRET'],
+                                                os.environ['PODIO_USERNAME'],
+                                                os.environ['PODIO_PASSWORD']
+                                            )
+                                            requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']}) 
+                                            print(message)
+                                            return 1
                                     if 'x-rate-limit-remaining' in err.status and err.status['x-rate-limit-remaining'] == '0':
                                         message = f"{hour.strftime('%H:%M:%S')} -> Quantidade de requisições chegou ao limite por hora."
                                         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
@@ -311,13 +356,14 @@ def insert_items(podio, cursor):
                         return 1
                     if err.status['status'] == '401':
                         message = f"{hour.strftime('%H:%M:%S')} -> Token expirado. Renovando..."
-                        requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                         podio = api.OAuthClient(
                             os.environ['PODIO_CLIENT_ID'],
                             os.environ['PODIO_CLIENT_SECRET'],
                             os.environ['PODIO_USERNAME'],
                             os.environ['PODIO_PASSWORD']
                         )
+                        requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
+                        print(message)
                         return 1
                     if 'x-rate-limit-remaining' in err.status and err.status['x-rate-limit-remaining'] == '0':
                         message = f"{hour.strftime('%H:%M:%S')} -> Quantidade de requisições chegou ao limite por hora."
@@ -353,8 +399,8 @@ if __name__ == '__main__':
     # Caso haja erro, provavelmente o token de acesso a API expirou.
     except api.transport.TransportException as err:
         hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
-        message = ""   
-        if err.status['status'] == '400':   
+        message = ""
+        if err.status['status'] == '400':
             if json.loads(err.content.decode('UTF-8'))['error_detail'] == 'oauth.client.invalid_secret':
                 message = f"{hour.strftime('%H:%M:%S')} -> Secret inválido. Terminando o programa."
             elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.username':
@@ -363,7 +409,7 @@ if __name__ == '__main__':
                 message = f"{hour.strftime('%H:%M:%S')} -> ID do cliente inválido. Terminando o programa."
             elif json.loads(err.content.decode('UTF-8'))['error_detail'] == 'user.invalid.password':
                 message = f"{hour.strftime('%H:%M:%S')} -> Senha do cliente inválido. Terminando o programa."
-        else:   
+        else:
             message = f"{hour.strftime('%H:%M:%S')} -> Terminando o programa. Erro no acesso a API. {err}"
         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
         print(message)
@@ -373,9 +419,9 @@ if __name__ == '__main__':
         #print(workspaces)
         try:
             # Acessando o BD para armazenar os dados das workspaces nele
-            # Porta padrão do MySQL 3306
             mydb = mysql.connector.connect(
                 host=os.environ['MYSQL_HOST'],
+                port=os.environ['MYSQL_PORT'],
                 user=os.environ['MYSQL_USERNAME'],
                 password=os.environ['MYSQL_PASSWORD']
             )
