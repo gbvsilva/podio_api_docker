@@ -65,6 +65,8 @@ def create_tables(podio, cursor):
     workspaces = get_all_workspaces(podio)
     if workspaces == 'token_expired' or workspaces == 'null_query':
         return 3
+    if workspaces == 'rate_limit':
+        return 2
     if type(workspaces) is list:
         # Verificando se as workspaces ja estão armazenadas no BD como databases. Se não, executar a criação
         cursor.execute("SHOW DATABASES")
@@ -261,13 +263,12 @@ def insert_items(podio, cursor):
                                                 cursor.execute("DROP TABLE "+table_name)
                                                 return 1
                                 except api.transport.TransportException as err:
-                                    hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                                     handled = handling_podio_error(err)
                                     if handled == 'status_504' or handled == 'null_query' or handled == 'status_400':
                                         return 1
-                                    if handled == 'token_expired':  
-                                        #return 1   
-                                        continue    
+                                    if handled == 'token_expired':
+                                        #return 1
+                                        continue
                                     if handled == 'rate_limit':
                                         return 2
                             elif dbcount > number_of_items:
@@ -314,7 +315,6 @@ if __name__ == '__main__':
         )
     # Caso haja erro, provavelmente o token de acesso a API expirou.
     except api.transport.TransportException as err:
-        hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
         handled = handling_podio_error(err)
         message = "Terminando o programa."
         if handled == 'status_400':
