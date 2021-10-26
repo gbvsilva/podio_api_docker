@@ -139,8 +139,9 @@ def create_tables(podio, cursor):
                     print(message)
                 except api.transport.TransportException as err:
                     handled = handling_podio_error(err)
-                    if handled == 'token_expired' or handled == 'status_400' or handled == 'not_known_yet':
-                        #return 3
+                    if handled == 'token_expired':
+                        return 3
+                    if handled == 'status_400' or handled == 'not_known_yet':
                         continue
         return 0
     #return 1
@@ -264,11 +265,8 @@ def insert_items(podio, cursor):
                                                 return 1
                                 except api.transport.TransportException as err:
                                     handled = handling_podio_error(err)
-                                    if handled == 'status_504' or handled == 'null_query' or handled == 'status_400':
+                                    if handled == 'status_504' or handled == 'null_query' or handled == 'status_400' or handled == 'token_expired':
                                         return 1
-                                    if handled == 'token_expired':
-                                        #return 1
-                                        continue
                                     if handled == 'rate_limit':
                                         return 2
                             elif dbcount > number_of_items:
@@ -283,11 +281,8 @@ def insert_items(podio, cursor):
                 except api.transport.TransportException as err:
                     hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                     handled = handling_podio_error(err)
-                    if handled == 'status_504' or handled == 'status_400':
+                    if handled == 'status_504' or handled == 'status_400' or handled == 'token_expired':
                         return 1
-                    if handled == 'token_expired':  
-                        #return 1   
-                        continue    
                     if handled == 'rate_limit':
                         return 2
                     return 1
@@ -394,6 +389,12 @@ if __name__ == '__main__':
                         cursor = mydb.cursor()
                     else:
                         message = "Tentando novamente..."
+                        podio = api.OAuthClient(
+                            client_id,
+                            client_secret,
+                            username,
+                            password
+                        )
                         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                         print(message)
                         time.sleep(1)
@@ -419,6 +420,12 @@ if __name__ == '__main__':
                     cursor = mydb.cursor()
                 elif res == 3:
                     message = "Tentando novamente..."
+                    podio = api.OAuthClient(
+                        client_id,
+                        client_secret,
+                        username,
+                        password
+                    )
                     requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                     print(message)
                     time.sleep(1)
