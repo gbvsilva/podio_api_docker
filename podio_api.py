@@ -129,7 +129,7 @@ def create_tables(podio, cursor):
                         elif app.get('status') != "active" and (table_name,) in tables:
                             cursor.execute("DROP TABLE "+table_name)
                             hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
-                            message = f"{hour.strftime('%H:%M:%S')} -> Tabela inativa `{table_name}` excluída."
+                            message = f"{hour.strftime('%H:%M:%S')} -> Tabela inativa `{table_name}` do BD `{db_name}` excluída."
                             requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                             print(message)
                 except mysql.connector.Error as err:
@@ -258,7 +258,7 @@ def insert_items(podio, cursor):
                                                 mydb.commit()
                                             except mysql.connector.Error as err:
                                                 hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
-                                                message = f"{hour.strftime('%H:%M:%S')} -> Aplicativo alterado. Excluindo a tabela `{table_name}`."
+                                                message = f"{hour.strftime('%H:%M:%S')} -> Aplicativo alterado. Excluindo a tabela `{table_name}` do BD `{db_name}`."
                                                 requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                                                 print(message)
                                                 cursor.execute("DROP TABLE "+table_name)
@@ -271,7 +271,7 @@ def insert_items(podio, cursor):
                                         return 2
                             elif dbcount > number_of_items:
                                 hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
-                                message = f"{hour.strftime('%H:%M:%S')} -> Itens excluídos do Podio. Excluindo a tabela `{table_name}` do BD e recriando-a."
+                                message = f"{hour.strftime('%H:%M:%S')} -> Itens excluídos do Podio. Excluindo a tabela `{table_name}` do BD `{db_name}` e recriando-a no próximo ciclo."
                                 requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
                                 print(message)
                                 cursor.execute("DROP TABLE " + table_name)
