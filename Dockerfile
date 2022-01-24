@@ -8,7 +8,7 @@ RUN apk add --no-cache py3-pip python3-dev git
 RUN git clone https://github.com/podio/podio-py.git
 RUN cd podio-py && python setup.py install
 
-RUN pip install --no-cache-dir mysql-connector-python requests
+RUN pip install --no-cache-dir pyscopg2-binary requests
 
 ADD podio_api.py /opt/podio_api/podio_api.py
 
