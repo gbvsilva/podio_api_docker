@@ -45,10 +45,10 @@ def handling_podio_error(err):
             message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado no acesso a API. {err}"
         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
         print(message)
-        return "not_known_yet"
     except requests.exceptions.ConnectionError as err:
         message = f"{hour.strftime('%H:%M:%S')} -> Erro no post para o Telegram. {err}"
         print(message)
+    return "not_known_yet"
 
 def get_all_workspaces(podio):
     # Obtendo informações de todas as organizações que o usuário tem acesso no Podio
