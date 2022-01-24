@@ -64,7 +64,7 @@ def get_all_workspaces(podio):
 
 # Rotina para a criação inicial do banco de dados MySQL.
 # Recebe a variável autenticada na API Podio e o cursor do BD.
-def create_tables(podio, cursor):
+def create_tables(podio):
     workspaces = get_all_workspaces(podio)
     if workspaces == 'token_expired' or workspaces == 'null_query':
         return 3
@@ -112,7 +112,7 @@ def create_tables(podio, cursor):
                         cursor.execute(sql.SQL("".join(query)))
                         hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                         message = f"{hour.strftime('%H:%M:%S')} -> {''.join(query)}"
-                        requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
+                        requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
                         mydb.commit()
                         print(message)
                     # Caso tabela esteja inativa no Podio, excluí-la
@@ -120,12 +120,12 @@ def create_tables(podio, cursor):
                         cursor.execute(sql.SQL(f"DROP TABLE podio.{table_name}"))
                         hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                         message = f"{hour.strftime('%H:%M:%S')} -> Tabela inativa `{table_name}` excluída."
-                        requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
+                        requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
                         print(message)
             except psycopg2.Error as err:
                 hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
                 message = f"{hour.strftime('%H:%M:%S')} -> Erro no acesso ao BD. {err}"
-                requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_CHAT_ID']})
+                requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
                 print(message)
             except api.transport.TransportException as err:
                 handled = handling_podio_error(err)
