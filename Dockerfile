@@ -15,4 +15,4 @@ ADD podio_api.py /opt/podio_api/podio_api.py
 RUN apk del git && rm -rf /var/cache/apk/*
 
 CMD ["/opt/podio_api/podio_api.py"]
-ENTRYPOINT ["python3"]
+ENTRYPOINT [ "python3" ]
