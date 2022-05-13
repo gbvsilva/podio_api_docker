@@ -9,8 +9,11 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import time, datetime
 import requests, json
 
+# Timezone of GMT-03
+TZ = datetime.timezone(datetime.timedelta(hours=-3))
+
 def handling_podio_error(err):
-    hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+    hour = datetime.datetime.now(TZ)
     message = ""
     try:
         if 'x-rate-limit-remaining' in err.status and err.status['x-rate-limit-remaining'] == '0':
@@ -58,7 +61,7 @@ def get_all_workspaces(podio):
     try:
         orgs = podio.Org.get_all()
         # Obtendo todas as workspaces que o usuário tem acesso
-        hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+        hour = datetime.datetime.now(TZ)
         message = f"{hour.strftime('%H:%M:%S')} -> Sucesso na obtenção das orgs."
         print(message)
         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
@@ -66,7 +69,7 @@ def get_all_workspaces(podio):
     except api.transport.TransportException as err:
         return handling_podio_error(err)
     except requests.exceptions.ConnectionError as err:
-        hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+        hour = datetime.datetime.now(TZ)
         message = f"{hour.strftime('%H:%M:%S')} -> Erro no post para o Telegram. {err}"
         print(message)
 
@@ -118,7 +121,7 @@ def create_tables(podio):
 
                         #print(table_name)
                         cursor.execute(sql.SQL("".join(query)))
-                        hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                        hour = datetime.datetime.now(TZ)
                         message = f"{hour.strftime('%H:%M:%S')} -> {''.join(query)}"
                         print(message)
                         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
@@ -126,12 +129,12 @@ def create_tables(podio):
                     # Caso tabela esteja inativa no Podio, excluí-la
                     elif app.get('status') != "active" and (table_name,) in tables:
                         cursor.execute(sql.SQL(f"DROP TABLE podio.{table_name}"))
-                        hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                        hour = datetime.datetime.now(TZ)
                         message = f"{hour.strftime('%H:%M:%S')} -> Tabela inativa `{table_name}` excluída."
                         print(message)
                         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
             except psycopg2.Error as err:
-                hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                hour = datetime.datetime.now(TZ)
                 message = f"{hour.strftime('%H:%M:%S')} -> Erro no acesso ao BD. {err}"
                 print(message)
                 requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
@@ -144,7 +147,7 @@ def create_tables(podio):
                 if handled == 'status_400' or handled == 'not_known_yet':
                     continue
             except requests.exceptions.ConnectionError as err:
-                hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                hour = datetime.datetime.now(TZ)
                 message = f"{hour.strftime('%H:%M:%S')} -> Erro no post para o Telegram. {err}"
                 print(message)
         mydb.close()
@@ -193,7 +196,7 @@ def insert_items(podio):
                         # quantidade de items obtidos na última iteração
                         number_of_items = podio.Application.get_items(app_info.get('app_id'))['total']
                         if dbcount < number_of_items:
-                            hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                            hour = datetime.datetime.now(TZ)
                             message = f"{hour.strftime('%H:%M:%S')} -> {table_name} tem {dbcount} itens no BD e {number_of_items} no Podio."
                             print(message)
                             requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
@@ -252,13 +255,13 @@ def insert_items(podio):
                                         query.append(")")
                                         try:
                                             cursor.execute(sql.SQL("".join(query)))
-                                            hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                                            hour = datetime.datetime.now(TZ)
                                             message = f"{hour.strftime('%H:%M:%S')} -> {''.join(query)}"
                                             print(message)
                                             requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
                                             mydb.commit()
                                         except psycopg2.Error as err:
-                                            hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                                            hour = datetime.datetime.now(TZ)
                                             message = f"{hour.strftime('%H:%M:%S')} -> Aplicativo alterado. Excluindo a tabela \"{table_name}\"."
                                             print(message)
                                             requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
@@ -271,7 +274,7 @@ def insert_items(podio):
                                 if handled == 'rate_limit':
                                     return 2
                         elif dbcount > number_of_items:
-                            hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                            hour = datetime.datetime.now(TZ)
                             message = f"{hour.strftime('%H:%M:%S')} -> Itens excluídos do Podio. Excluindo a tabela \"{table_name}\" do BD e recriando-a."
                             print(message)
                             requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
@@ -287,12 +290,28 @@ def insert_items(podio):
                     return 2
                 return 1
             except requests.exceptions.ConnectionError as err:
-                hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                hour = datetime.datetime.now(TZ)
                 message = f"{hour.strftime('%H:%M:%S')} -> Erro no post para o Telegram. {err}"
                 print(message)
         mydb.close()
         return 0
     return 1
+
+def convert(seconds):
+	hours = seconds // 3600
+	seconds %= 3600
+	mins = seconds // 60
+	seconds %= 60
+	return hours, mins, seconds
+
+def timer(seconds):
+	count = 0
+	while count < seconds:
+		hours, mins, secs = convert(count)
+		timer = '{:02d}:{:02d}:{:02d}'.format(hours, mins, secs)
+		print(timer, end='\r')
+		time.sleep(1)
+		count += 1
 
 if __name__ == '__main__':
     # Recuperando as variáveis de ambiente e guardando
@@ -307,7 +326,7 @@ if __name__ == '__main__':
     try:
         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
     except requests.exceptions.ConnectionError as err:
-        hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+        hour = datetime.datetime.now(TZ)
         message = f"{hour.strftime('%H:%M:%S')} -> Erro no post para o Telegram. {err}"
         print(message)
     
@@ -327,7 +346,7 @@ if __name__ == '__main__':
             try:
                 requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
             except requests.exceptions.ConnectionError as err:
-                hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                hour = datetime.datetime.now(TZ)
                 message = f"{hour.strftime('%H:%M:%S')} -> Erro no post para o Telegram. {err}"
                 print(message)
         exit(1)
@@ -341,7 +360,7 @@ if __name__ == '__main__':
             try:
                 requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
             except requests.exceptions.ConnectionError as err:
-                hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                hour = datetime.datetime.now(TZ)
                 message = f"{hour.strftime('%H:%M:%S')} -> Erro no post para o Telegram. {err}"
                 print(message)
             res = create_tables(podio)
@@ -349,16 +368,16 @@ if __name__ == '__main__':
                 result = insert_items(podio)
                 # Caso o limite de requisições seja atingido, espera-se mais 1 hora até a seguinte iteração
                 if result == 2:
-                    hour = datetime.datetime.now() + datetime.timedelta(hours=-2)
+                    hour = datetime.datetime.now(TZ) + datetime.timedelta(hours=1)
                     message = f"Esperando a hora seguinte. Até às {hour.strftime('%H:%M:%S')}"
                     print(message)
                     try:
                         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
                     except requests.exceptions.ConnectionError as err:
-                        hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                        hour = datetime.datetime.now(TZ)
                         message = f"{hour.strftime('%H:%M:%S')} -> Erro no post para o Telegram. {err}"
                         print(message)
-                    time.sleep(3600)
+                    timer(3600)
                     podio = api.OAuthClient(	
                         client_id,	
                         client_secret,	
@@ -367,17 +386,17 @@ if __name__ == '__main__':
                     )
                 elif result == 0:
                     # Nesse caso foi criado o primeiro snapshot do Podio no BD. Próxima iteração no dia seguinte
-                    now = datetime.datetime.now()
-                    hours = now + datetime.timedelta(hours=5)
+                    now = datetime.datetime.now(TZ)
+                    hours = now + datetime.timedelta(hours=8)
                     message = f"Esperando as próximas 8hs. Até às {hours.strftime('%H:%M:%S')}"
                     print(message)
                     try:
                         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
                     except requests.exceptions.ConnectionError as err:
-                        hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                        hour = datetime.datetime.now(TZ)
                         message = f"{hour.strftime('%H:%M:%S')} -> Erro no post para o Telegram. {err}"
                         print(message)
-                    time.sleep(28800)
+                    timer(28800)
                     podio = api.OAuthClient(	
                         client_id,	
                         client_secret,	
@@ -390,7 +409,7 @@ if __name__ == '__main__':
                     try:
                         requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
                     except requests.exceptions.ConnectionError as err:
-                        hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                        hour = datetime.datetime.now(TZ)
                         message = f"{hour.strftime('%H:%M:%S')} -> Erro no post para o Telegram. {err}"
                         print(message)
                     podio = api.OAuthClient(	
@@ -401,16 +420,16 @@ if __name__ == '__main__':
                     )
                     time.sleep(1)
             elif res == 2:
-                hour = datetime.datetime.now() + datetime.timedelta(hours=-2)
+                hour = datetime.datetime.now(TZ) + datetime.timedelta(hours=1)
                 message = f"Esperando a hora seguinte às {hour.strftime('%H:%M:%S')}"
                 print(message)
                 try:
                     requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
                 except requests.exceptions.ConnectionError as err:
-                    hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                    hour = datetime.datetime.now(TZ)
                     message = f"{hour.strftime('%H:%M:%S')} -> Erro no post para o Telegram. {err}"
                     print(message)
-                time.sleep(3600)
+                timer(3600)
                 podio = api.OAuthClient(	
                     client_id,	
                     client_secret,	
@@ -423,7 +442,7 @@ if __name__ == '__main__':
                 try:
                     requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
                 except requests.exceptions.ConnectionError as err:
-                    hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                    hour = datetime.datetime.now(TZ)
                     message = f"{hour.strftime('%H:%M:%S')} -> Erro no post para o Telegram. {err}"
                     print(message)
                 podio = api.OAuthClient(	
@@ -434,13 +453,13 @@ if __name__ == '__main__':
                 )
                 time.sleep(1)
             else:
-                hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                hour = datetime.datetime.now(TZ)
                 message = f"{hour.strftime('%H:%M:%S')} -> Erro inesperado na criação/atualização do BD. Terminando o programa."
                 print(message)
                 try:
                     requests.post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_AUTH_TOKEN']}/sendMessage", data={'text': message, 'chat_id': os.environ['TELEGRAM_BOT_CHAT_ID']})
                 except requests.exceptions.ConnectionError as err:
-                    hour = datetime.datetime.now() + datetime.timedelta(hours=-3)
+                    hour = datetime.datetime.now(TZ)
                     message = f"{hour.strftime('%H:%M:%S')} -> Erro no post para o Telegram. {err}"
                     print(message)
                 exit(1)
