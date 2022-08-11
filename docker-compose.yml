@@ -24,4 +24,7 @@ services:
     image: gbvsilva/podio-api:mysql
     env_file:
       - '/home/graco.silva/git/env-files/podio_api/env.bi'
+      - '/home/graco.silva/git/env-files/databases/env.graco_local'
+      - '/home/graco.silva/git/env-files/misc/env.local'
+      - '/home/graco.silva/git/env-files/telegram/env.graco'
     network_mode: host
