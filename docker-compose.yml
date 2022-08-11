@@ -26,4 +26,4 @@ services:
       - '/home/graco.silva/git/env-files/podio_api/env.bi'
       - '/home/graco.silva/git/env-files/databases/env.gn_dw'
       - '/home/graco.silva/git/env-files/misc/env.local'
-      - '/home/graco.silva/git/env-files/telegram/env.graco'
+      - '/home/graco.silva/git/env-files/telegram/env.podio_api_bot'
