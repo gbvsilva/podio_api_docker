@@ -24,3 +24,4 @@ services:
     image: gbvsilva/podio-api:postgres
     env_file:
       - '/home/graco.silva/git/env-files/podio_api/env.bi'
+      - '/home/graco.silva/git/env-files/gn_databases/env.gn_dw'
