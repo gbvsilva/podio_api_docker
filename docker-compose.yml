@@ -6,7 +6,7 @@ services:
   # App Container
   # ------------------------------------
 
-  app:
+  podio_api-mysql:
     container_name: podio_api-mysql
     deploy:
       restart_policy:
