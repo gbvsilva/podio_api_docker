@@ -26,5 +26,5 @@ services:
       - '/home/graco.silva/git/env-files/podio_api/env.bi'
       - '/home/graco.silva/git/env-files/databases/env.graco_local'
       - '/home/graco.silva/git/env-files/misc/env.local'
-      - '/home/graco.silva/git/env-files/telegram/env.graco'
+      - '/home/graco.silva/git/env-files/telegram/env.podio_api_aux_bot'
     network_mode: host
