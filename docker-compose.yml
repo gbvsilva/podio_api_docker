@@ -6,7 +6,7 @@ services:
   # App Container
   # ------------------------------------
 
-  app:
+  podio_api-postgres:
     container_name: podio_api-postgres
     deploy:
       restart_policy:
