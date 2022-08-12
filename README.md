@@ -2,13 +2,15 @@
 
 Version of Podio Python Script inside docker container
 
-Usage:
+Commands:
 
 ```shell
 docker-compose up -d
 ```
 
-or
+```shell
+docker pull "{dockerhub_username}"/podio_api:postgresql
+```
 
 ```shell
 docker build -t "{dockerhub_username}"/podio_api:postgresql .
