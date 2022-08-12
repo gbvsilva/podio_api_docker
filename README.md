@@ -5,6 +5,12 @@ Version of Podio Python Script inside docker container
 Usage:
 
 ```shell
+docker-compose up -d
+```
+
+or
+
+```shell
 docker build -t "{dockerhub_username}"/podio_api:mysql .
 ```
 
