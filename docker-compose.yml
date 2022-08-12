@@ -9,8 +9,6 @@ services:
   podio_api-mysql:
     container_name: podio_api-mysql
     deploy:
-      restart_policy:
-        condition: any
       resources:
         reservations:
           cpus: '0.5'
@@ -21,6 +19,7 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+    restart: on-failure:3
     image: gbvsilva/podio-api:mysql
     env_file:
       - '/home/graco.silva/git/env-files/podio_api/env.bi'
