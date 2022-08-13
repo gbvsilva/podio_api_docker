@@ -15,10 +15,10 @@ def getDB():
                     port=env.get('POSTGRES_PORT'))
         mydb.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     except psycopg2.Error as err:
-        # Inatividade do banco ou credenciais inválidas
+        # Não alcance, inatividade do banco ou credenciais inválidas
         message = f"{getHour()} -> Erro inesperado no acesso inicial ao BD. Terminando o programa. {err}"
         print(message)
-        sendToBot(message)
+        #sendToBot(message)
         exit(1)
     else:
         return mydb
