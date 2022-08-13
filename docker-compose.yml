@@ -22,7 +22,7 @@ services:
     restart: always
     image: gbvsilva/podio-api:postgres
     env_file:
-      - "${POOIO_API_ENVFILE}"
+      - "${PODIO_API_ENVFILE}"
       - "${DATABASE_ENVFILE}"
       - "${MISC_ENVFILE}"
       - "${TELEGRAM_ENVFILE}"
