@@ -68,7 +68,7 @@ if __name__ == '__main__':
                 elif result == 0:
                     # Nesse caso foi criado o primeiro snapshot do Podio no BD. Próxima iteração no dia seguinte
                     hours = getHour(hours=8)
-                    message = f"Esperando as próximas {timeOffset//3600}hs. Até às {hours}"
+                    message = f"Esperando as próximas {timeOffset/3600}hs. Até às {hours}"
                     print(message)
                     sendToBot(message)
                     timer(timeOffset)
