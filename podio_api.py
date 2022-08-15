@@ -49,6 +49,7 @@ if __name__ == '__main__':
         while True:
             message = f"==== Ciclo {cycle} ===="
             print(message)
+            sendToBot(message)
             res = createTables(podio, apps_ids)
             if res == 0:
                 result = insertItems(podio, apps_ids)
