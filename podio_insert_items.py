@@ -54,7 +54,7 @@ def insertItems(podio, apps_ids):
                                                     "%Y-%m-%d %H:%M:%S").timetuple())
                             if cursor.rowcount > 0:
                                 last_event_on_db = cursor.fetchone()[0]
-                                time2 = time.mktime(datetime.datetime.strptime(last_event_on_db, 
+                                time2 = time.mktime(datetime.datetime.strptime(str(last_event_on_db), 
                                                     "%Y-%m-%d %H:%M:%S").timetuple())
                                 if time1 > time2:
                                     hour = getHour()
