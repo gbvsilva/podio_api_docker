@@ -59,7 +59,7 @@ def insertItems(podio, apps_ids):
                                     message = f"{hour} -> Item com ID={item['item_id']} atualizado no Podio. Excluindo-o da tabela '{tableName}'"
                                     print(message)
                                     sendToBot(message)
-                                    cursor.execute(f"DROP FROM podio.{tableName} WHERE id='{item['item_id']}'")
+                                    cursor.execute(f"DELETE FROM podio.{tableName} WHERE id='{item['item_id']}'")
 
                             if cursor.rowcount == 0 or last_event_on_podio > last_event_on_db:
                                 query = [f"INSERT INTO podio.{tableName}", " VALUES", "("]
