@@ -63,7 +63,7 @@ def insertItems(podio, apps_ids):
 
                             if cursor.rowcount == 0 or last_event_on_podio > last_event_on_db:
                                 query = [f"INSERT INTO podio.{tableName}", " VALUES", "("]
-                                query.extend([f"'{str(item['item_id'])},'{str(item['created_on'])}','{str(last_event_on_podio)}'"])
+                                query.extend([f"'{str(item['item_id'])}','{str(item['created_on'])}','{str(last_event_on_podio)}'"])
                                 fields = [x for x in item['fields'] if f"\"{x['external_id'][:40]}\"" in tableLabels]
                                 # Fazendo a comparação entre os campos existentes e os preenchidos
                                 # Caso o campo esteja em branco no Podio, preencher com '?'
