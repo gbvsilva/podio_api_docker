@@ -22,8 +22,8 @@ services:
     restart: on-failure:3
     image: gbvsilva/podio-api:mysql
     env_file:
-      - '/home/graco.silva/git/env-files/podio_api/env.bi'
-      - '/home/graco.silva/git/env-files/databases/env.graco_local'
-      - '/home/graco.silva/git/env-files/misc/env.local'
-      - '/home/graco.silva/git/env-files/telegram/env.podio_api_aux_bot'
+      - '/home/graco.silva/git/env-files/podio_api/bi.env'
+      - '/home/graco.silva/git/env-files/databases/graco_local.env'
+      - '/home/graco.silva/git/env-files/misc/local.env'
+      - '/home/graco.silva/git/env-files/telegram/podio_api_aux_bot.env'
     network_mode: host
