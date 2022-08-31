@@ -8,7 +8,6 @@ import time
 from get_time import getHour, timer
 from podio_create_tables import createTables
 from podio_insert_items import insertItems
-from podio_update_items import updateItems
 from podio_tools import handlingPodioError
 from telegram_tools import sendToBot
 
