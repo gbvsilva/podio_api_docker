@@ -53,7 +53,7 @@ def insertItems(podio, apps_ids):
                             time1 = time.mktime(datetime.datetime.strptime(last_event_on_podio, 
                                                     "%Y-%m-%d %H:%M:%S").timetuple())
                             if cursor.rowcount > 0:
-                                last_event_on_db = time.mktime(datetime.datetime.strptime(cursor.fetchone()[0], 
+                                last_event_on_db = time.mktime(datetime.datetime.strptime(str(cursor.fetchone()[0]), 
                                                     "%Y-%m-%d %H:%M:%S").timetuple())
                                 time2 = time.mktime(datetime.datetime.strptime(last_event_on_db, 
                                                     "%Y-%m-%d %H:%M:%S").timetuple())
