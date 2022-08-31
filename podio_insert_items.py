@@ -13,7 +13,7 @@ from podio_tools import handlingPodioError, getFieldValues
 # Retorna 2 caso seja atingido o limite de requisições por hora
 def insertItems(podio, apps_ids):
     mydb = getDB()
-    cursor = mydb.cursor()
+    cursor = mydb.cursor(buffered=True)
     cursor.execute("USE podio")
     for app_id in apps_ids:
         try:
