@@ -24,9 +24,6 @@ def insertItems(podio, apps_ids):
             tableName = spaceName+"__"+appName
             
             if (tableName,) in tables:
-                # cursor.execute("SELECT COUNT(id) FROM podio."+tableName)
-                # dbCount = cursor.fetchall()[0][0]
-
                 tableLabels = []
                 for field in appInfo.get('fields'):
                     if field['status'] == "active":
