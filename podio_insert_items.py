@@ -1,4 +1,4 @@
-import time, datetime
+import datetime
 from get_time import getHour
 
 from psycopg2 import Error as dbError
@@ -49,23 +49,21 @@ def insertItems(podio, apps_ids):
                         for item in items:
                             # Buscando a última atualização do Item no banco
                             cursor.execute(f"SELECT \"last_event_on\" FROM podio.{tableName} WHERE id='{item['item_id']}'")
-                            last_event_on_podio = item['last_event_on']
-                            time1 = time.mktime(datetime.datetime.strptime(last_event_on_podio, 
-                                                    "%Y-%m-%d %H:%M:%S").timetuple())
+                            last_event_on_podio = datetime.datetime.strptime(item['last_event_on'], 
+                                                    "%Y-%m-%d %H:%M:%S")
                             if cursor.rowcount > 0:
                                 last_event_on_db = cursor.fetchone()[0]
-                                time2 = time.mktime(datetime.datetime.strptime(str(last_event_on_db), 
-                                                    "%Y-%m-%d %H:%M:%S").timetuple())
-                                if time1 > time2:
+                    
+                                if last_event_on_podio > last_event_on_db:
                                     hour = getHour()
                                     message = f"{hour} -> Item com ID={item['item_id']} atualizado no Podio. Excluindo-o da tabela '{tableName}'"
                                     print(message)
                                     sendToBot(message)
                                     cursor.execute(f"DROP FROM podio.{tableName} WHERE id='{item['item_id']}'")
 
-                            if cursor.rowcount == 0 or time1 > time2:
+                            if cursor.rowcount == 0 or last_event_on_podio > last_event_on_db:
                                 query = [f"INSERT INTO podio.{tableName}", " VALUES", "("]
-                                query.extend([f"'{str(item['item_id'])}','{str(item['created_on'])}','{last_event_on_podio}',"])
+                                query.extend([f"'{str(item['item_id'])}','{item['created_on']}','{last_event_on_podio}',"])
                                 fields = [x for x in item['fields'] if f"\"{x['external_id'][:40]}\"" in tableLabels]
                                 # Fazendo a comparação entre os campos existentes e os preenchidos
                                 # Caso o campo esteja em branco no Podio, preencher com '?'
