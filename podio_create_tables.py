@@ -62,6 +62,8 @@ def createTables(podio, apps_ids):
             handled = handlingPodioError(err)
             if handled == 'token_expired':
                 return 3
+            if handled == 'rate_limit':
+                return 2
             if handled == 'status_400' or handled == 'not_known_yet':
                 continue
     mydb.close()
