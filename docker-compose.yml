@@ -26,3 +26,5 @@ services:
       - "${DATABASE_ENVFILE}"
       - "${MISC_ENVFILE}"
       - "${TELEGRAM_ENVFILE}"
+    volumes:
+      - ./:/opt/podio_api
