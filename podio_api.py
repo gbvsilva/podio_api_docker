@@ -60,12 +60,17 @@ if __name__ == '__main__':
                     print(message)
                     sendToBot(message)
                     timer(3600)
-                    podio = api.OAuthClient(	
-                        client_id,	
-                        client_secret,	
-                        username,	
-                        password	
-                    )
+                    try:
+                        podio = api.OAuthClient(
+                            client_id,
+                            client_secret,
+                            username,
+                            password
+                        )
+                    except:
+                        message = 'Erro na obtenção do novo cliente Podio! Tentando novamente...'
+                        print(message)
+                        sendToBot(message)
                 elif insertion == 0:
                     # Nesse caso foi criado o primeiro snapshot do Podio no BD. Próxima iteração no dia seguinte
                     hours = getHour(seconds=timeOffset)
@@ -73,22 +78,32 @@ if __name__ == '__main__':
                     print(message)
                     sendToBot(message)
                     timer(timeOffset)
-                    podio = api.OAuthClient(	
-                        client_id,	
-                        client_secret,	
-                        username,	
-                        password	
-                    )
+                    try:
+                        podio = api.OAuthClient(
+                            client_id,
+                            client_secret,
+                            username,
+                            password
+                        )
+                    except:
+                        message = 'Erro na obtenção do novo cliente Podio! Tentando novamente...'
+                        print(message)
+                        sendToBot(message)
                 else:
                     message = "Tentando novamente..."
                     print(message)
                     sendToBot(message)
-                    podio = api.OAuthClient(	
-                        client_id,	
-                        client_secret,	
-                        username,	
-                        password	
-                    )
+                    try:
+                        podio = api.OAuthClient(
+                            client_id,
+                            client_secret,
+                            username,
+                            password
+                        )
+                    except:
+                        message = 'Erro na obtenção do novo cliente Podio! Tentando novamente...'
+                        print(message)
+                        sendToBot(message)
                     #time.sleep(1)
             elif creation == 2:
                 hour = getHour(hours=1)
@@ -96,22 +111,32 @@ if __name__ == '__main__':
                 print(message)
                 sendToBot(message)
                 timer(3600)
-                podio = api.OAuthClient(	
-                    client_id,	
-                    client_secret,	
-                    username,	
-                    password	
-                )
+                try:
+                    podio = api.OAuthClient(
+                        client_id,
+                        client_secret,
+                        username,
+                        password
+                    )
+                except:
+                    message = 'Erro na obtenção do novo cliente Podio! Tentando novamente...'
+                    print(message)
+                    sendToBot(message)
             elif creation == 3:
                 message = "Tentando novamente..."
                 print(message)
                 sendToBot(message)
-                podio = api.OAuthClient(	
-                    client_id,	
-                    client_secret,	
-                    username,	
-                    password	
-                )
+                try:
+                    podio = api.OAuthClient(
+                        client_id,
+                        client_secret,
+                        username,
+                        password
+                    )
+                except:
+                    message = 'Erro na obtenção do novo cliente Podio! Tentando novamente...'
+                    print(message)
+                    sendToBot(message)
                 #time.sleep(1)
             else:
                 hour = getHour()
