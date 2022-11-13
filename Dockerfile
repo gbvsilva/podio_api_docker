@@ -14,7 +14,7 @@ RUN git clone https://github.com/podio/podio-py.git
 RUN cd podio-py && python setup.py install
 
 # Installing Python dependencies
-RUN pip install --no-cache-dir mysql-connector-python requests
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Cleaning cache
 RUN apk del git && rm -rf /var/cache/apk/*
