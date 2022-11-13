@@ -23,7 +23,7 @@ def insertItems(podio, apps_ids):
             cursor.execute("SHOW TABLES")
             tables = cursor.fetchall()
             tableName = spaceName+"__"+appName
-            
+
             if (tableName,) in tables:
                 tableLabels = []
                 for field in appInfo.get('fields'):
@@ -51,7 +51,7 @@ def insertItems(podio, apps_ids):
                                                     "%Y-%m-%d %H:%M:%S")
                             if cursor.rowcount > 0:
                                 last_event_on_db = cursor.fetchone()[0]
-                    
+
                                 if last_event_on_podio > last_event_on_db:
                                     hour = getHour()
                                     message = f"{hour} -> Item com ID={item['item_id']} atualizado no Podio. Excluindo-o da tabela '{tableName}'"
@@ -98,7 +98,7 @@ def insertItems(podio, apps_ids):
                         return 2
 
         except TransportException as err:
-            handled = handlingPodioError(err)	
+            handled = handlingPodioError(err)
             if handled == 'status_504' or handled == 'status_400' or handled == 'token_expired':
                 return 1
             if handled == 'rate_limit':

@@ -61,11 +61,11 @@ if __name__ == '__main__':
                     sendToBot(message)
                     timer(3600)
                     try:
-                        podio = api.OAuthClient(	
-                            client_id,	
-                            client_secret,	
-                            username,	
-                            password	
+                        podio = api.OAuthClient(
+                            client_id,
+                            client_secret,
+                            username,
+                            password
                         )
                     except:
                         message = 'Erro na obtenção do novo cliente Podio! Tentando novamente...'
@@ -79,11 +79,11 @@ if __name__ == '__main__':
                     sendToBot(message)
                     timer(timeOffset)
                     try:
-                        podio = api.OAuthClient(	
-                            client_id,	
-                            client_secret,	
-                            username,	
-                            password	
+                        podio = api.OAuthClient(
+                            client_id,
+                            client_secret,
+                            username,
+                            password
                         )
                     except:
                         message = 'Erro na obtenção do novo cliente Podio! Tentando novamente...'
@@ -94,11 +94,11 @@ if __name__ == '__main__':
                     print(message)
                     sendToBot(message)
                     try:
-                        podio = api.OAuthClient(	
-                            client_id,	
-                            client_secret,	
-                            username,	
-                            password	
+                        podio = api.OAuthClient(
+                            client_id,
+                            client_secret,
+                            username,
+                            password
                         )
                     except:
                         message = 'Erro na obtenção do novo cliente Podio! Tentando novamente...'
@@ -112,11 +112,11 @@ if __name__ == '__main__':
                 sendToBot(message)
                 timer(3600)
                 try:
-                    podio = api.OAuthClient(	
-                        client_id,	
-                        client_secret,	
-                        username,	
-                        password	
+                    podio = api.OAuthClient(
+                        client_id,
+                        client_secret,
+                        username,
+                        password
                     )
                 except:
                     message = 'Erro na obtenção do novo cliente Podio! Tentando novamente...'
@@ -127,11 +127,11 @@ if __name__ == '__main__':
                 print(message)
                 sendToBot(message)
                 try:
-                    podio = api.OAuthClient(	
-                        client_id,	
-                        client_secret,	
-                        username,	
-                        password	
+                    podio = api.OAuthClient(
+                        client_id,
+                        client_secret,
+                        username,
+                        password
                     )
                 except:
                     message = 'Erro na obtenção do novo cliente Podio! Tentando novamente...'
