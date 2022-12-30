@@ -1,4 +1,7 @@
 import logging
+import datetime
+
+from get_time import TZ
 
 
 class CustomFormatter(logging.Formatter):
@@ -22,10 +25,13 @@ class CustomFormatter(logging.Formatter):
             logging.CRITICAL: self.bold_red + self.fmt + self.reset
         }
 
+        self.converter = datetime.datetime.now(TZ).timetuple()
+
     def format(self, record):
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
