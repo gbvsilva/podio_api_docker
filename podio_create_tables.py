@@ -1,3 +1,5 @@
+from get_time import getHour
+
 from psycopg2 import Error as dbError
 from get_mydb import getDB
 
@@ -41,20 +43,23 @@ def createTables(podio, apps_ids):
                 query.append(")")
 
                 cursor.execute("".join(query))
+                hour = getHour()
                 message = f"{''.join(query)}"
                 mydb.commit()
                 logger.info(message)
-                sendToBot(log_stream.getvalue())
+                sendToBot(f'{hour} -> {message}')
             # Caso tabela esteja inativa no Podio, excluí-la
             elif appInfo.get('status') != "active" and (tableName,) in tables:
                 cursor.execute(f"DROP TABLE podio.{tableName}")
+                hour = getHour()
                 message = f"Tabela inativa `{tableName}` excluída."
                 logger.info(message)
-                sendToBot(log_stream.getvalue())
+                sendToBot(f'{hour} -> {message}')
         except dbError as err:
             message = f"Erro no acesso ao BD. {err}"
+            hour = getHour()
             logger.error(message)
-            sendToBot(log_stream.getvalue())
+            sendToBot(f'{hour} -> {message}')
         except TransportException as err:
             handled = handlingPodioError(err)
             if handled == 'token_expired':

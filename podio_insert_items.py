@@ -1,4 +1,5 @@
 import datetime
+from get_time import getHour
 
 from psycopg2 import Error as dbError
 from get_mydb import getDB
@@ -53,9 +54,10 @@ def insertItems(podio, apps_ids):
                                 last_event_on_db = cursor.fetchone()[0]
 
                                 if last_event_on_podio > last_event_on_db:
+                                    hour = getHour()
                                     message = f"Item com ID={item['item_id']} atualizado no Podio. Excluindo-o da tabela '{tableName}'"
                                     logger.info(message)
-                                    sendToBot(log_stream.getvalue())
+                                    sendToBot(f'{hour} -> {message}')
                                     cursor.execute(f"DELETE FROM podio.{tableName} WHERE id='{item['item_id']}'")
 
                             if cursor.rowcount == 0 or last_event_on_podio > last_event_on_db:
@@ -77,14 +79,16 @@ def insertItems(podio, apps_ids):
                                 query.append(")")
                                 try:
                                     cursor.execute("".join(query))
+                                    hour = getHour()
                                     message = f"{''.join(query)}"
                                     logger.info(message)
-                                    sendToBot(log_stream.getvalue())
+                                    sendToBot(f'{hour} -> {message}')
                                     mydb.commit()
                                 except dbError as err:
+                                    hour = getHour()
                                     message = f"Aplicativo alterado. Excluindo a tabela \"{tableName}\". {err}"
                                     logger.info(message)
-                                    sendToBot(log_stream.getvalue())
+                                    sendToBot(f'{hour} -> {message}')
                                     cursor.execute(f"DROP TABLE podio.{tableName}")
                                     return 1
                 except TransportException as err:

@@ -38,11 +38,8 @@ logger.setLevel(logging.DEBUG)
 # Define format for logs
 fmt = '%(asctime)s -> %(message)s'
 
-# Add log to string
-log_stream = StringIO()
-
 # Create stdout handler for logging to the console (logs all five levels)
-stdout_handler = logging.StreamHandler(stream=log_stream)
+stdout_handler = logging.StreamHandler()
 stdout_handler.setLevel(logging.DEBUG)
 stdout_handler.setFormatter(CustomFormatter(fmt))
 
