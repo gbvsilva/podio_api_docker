@@ -7,5 +7,3 @@ protobuf==3.19.3
 pyparsing==3.0.6
 requests==2.27.1
 urllib3==1.26.8
-tzlocal==4.0.2
-backports.zoneinfo;python_version<"3.9"
