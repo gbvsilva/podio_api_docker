@@ -33,7 +33,7 @@ logger.setLevel(logging.DEBUG)
 
 # Add log to string
 log_stream = StringIO()
-logging.basicConfig(stream=log_stream)
+logging.basicConfig(stream=log_stream, level=logging.DEBUG)
 
 # Create custom logger logging all five levels
 logger = logging.getLogger(__name__)
