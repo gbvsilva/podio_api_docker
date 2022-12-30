@@ -8,6 +8,8 @@ from get_mydb import getDB
 from pypodio2.transport import TransportException
 from podio_tools import handlingPodioError, getFieldValues
 
+from logging_tools import logger
+
 # Inserindo dados no Banco. Retorna 0 se nao ocorreram erros
 # Retorna 1 caso precise refazer a estrutura do Banco, excluindo alguma(s) tabela(s).
 # Retorna 2 caso seja atingido o limite de requisições por hora
@@ -41,22 +43,22 @@ def insertItems(podio, apps_ids):
                     for step in range(0, numberOfItems, 500):
                         # O valor padrão do offset é 0 de acordo com a documentação da API.
                         # Ordenando de forma crescente da data de criação para unificar a estruturação do BD.
-                        filteredItems = podio.Item.filter(appInfo.get('app_id'), 
+                        filteredItems = podio.Item.filter(appInfo.get('app_id'),
                                         {"offset": step, "sort_by": "created_on", "sort_desc": False, "limit": 500})
                         items = filteredItems.get('items')
                         for item in items:
                             # Buscando a última atualização do Item no banco
                             cursor.execute(f"SELECT `last_event_on` FROM {tableName} WHERE `id`='{item['item_id']}'")
-                            last_event_on_podio = datetime.datetime.strptime(item['last_event_on'], 
+                            last_event_on_podio = datetime.datetime.strptime(item['last_event_on'],
                                                     "%Y-%m-%d %H:%M:%S")
                             if cursor.rowcount > 0:
                                 last_event_on_db = cursor.fetchone()[0]
 
                                 if last_event_on_podio > last_event_on_db:
                                     hour = getHour()
-                                    message = f"{hour} -> Item com ID={item['item_id']} atualizado no Podio. Excluindo-o da tabela '{tableName}'"
-                                    print(message)
-                                    sendToBot(message)
+                                    message = f"Item com ID={item['item_id']} atualizado no Podio. Excluindo-o da tabela '{tableName}'"
+                                    logger.info(message)
+                                    sendToBot(f'{hour} -> {message}')
                                     cursor.execute(f"DELETE FROM {tableName} WHERE id='{item['item_id']}'")
                             if cursor.rowcount == 0 or last_event_on_podio > last_event_on_db:
                                 query = [f"INSERT INTO podio.{tableName}", " VALUES", "("]
@@ -79,15 +81,15 @@ def insertItems(podio, apps_ids):
                                 try:
                                     cursor.execute("".join(query))
                                     hour = getHour()
-                                    message = f"{hour} -> {''.join(query)}"
-                                    print(message)
-                                    sendToBot(message)
+                                    message = f"{''.join(query)}"
+                                    logger.info(message)
+                                    sendToBot(f'{hour} -> {message}')
                                     mydb.commit()
                                 except dbError as err:
                                     hour = getHour()
-                                    message = f"{hour} -> Aplicativo alterado. Excluindo a tabela \"{tableName}\". {err}"
-                                    print(message)
-                                    sendToBot(message)
+                                    message = f"Aplicativo alterado. Excluindo a tabela \"{tableName}\". {err}"
+                                    logger.info(message)
+                                    sendToBot(f'{hour} -> {message}')
                                     cursor.execute("DROP TABLE "+tableName)
                                     return 1
                 except TransportException as err:
