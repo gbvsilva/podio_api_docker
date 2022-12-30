@@ -31,10 +31,6 @@ class CustomFormatter(logging.Formatter):
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-# Add log to string
-log_stream = StringIO()
-logging.basicConfig(stream=log_stream, level=logging.DEBUG)
-
 # Create custom logger logging all five levels
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -42,8 +38,11 @@ logger.setLevel(logging.DEBUG)
 # Define format for logs
 fmt = '%(asctime)s -> %(message)s'
 
+# Add log to string
+log_stream = StringIO()
+
 # Create stdout handler for logging to the console (logs all five levels)
-stdout_handler = logging.StreamHandler()
+stdout_handler = logging.StreamHandler(stream=log_stream)
 stdout_handler.setLevel(logging.DEBUG)
 stdout_handler.setFormatter(CustomFormatter(fmt))
 
