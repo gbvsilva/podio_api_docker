@@ -2,7 +2,6 @@ import logging
 from datetime import datetime, tzinfo
 
 import pytz
-import tzlocal
 
 
 class CustomFormatter(logging.Formatter):
@@ -18,7 +17,7 @@ class CustomFormatter(logging.Formatter):
     def __init__(self, fmt=None, datefmt=None, tz=None):
 
         if tz is None:
-            self.tz = tzlocal.get_localzone()
+            self.tz = "America/Fortaleza"
         elif isinstance(tz, tzinfo):
             self.tz = tz
         else:
