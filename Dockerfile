@@ -7,7 +7,7 @@ WORKDIR /opt/podio_api
 
 # Installing dependencies
 RUN apk update
-RUN apk add --no-cache py3-pip python3-dev git gcc
+RUN apk add --no-cache py3-pip python3-dev git
 
 # Getting pypodio2 library
 RUN git clone https://github.com/podio/podio-py.git

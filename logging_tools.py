@@ -1,8 +1,6 @@
 import logging
 from datetime import datetime, tzinfo
 
-import pytz
-
 
 class CustomFormatter(logging.Formatter):
     """Logging colored formatter, adapted from https://stackoverflow.com/a/56944256/3638629"""
@@ -14,15 +12,9 @@ class CustomFormatter(logging.Formatter):
     bold_red = '\x1b[31;1m'
     reset = '\x1b[0m'
 
-    def __init__(self, fmt=None, datefmt=None, tz=None):
-
-        if tz is None:
-            self.tz = "America/Fortaleza"
-        elif isinstance(tz, tzinfo):
-            self.tz = tz
-        else:
-            self.tz = pytz.timezone(tz)
-
+    def __init__(self, fmt):
+        super().__init__()
+        self.tz = "America/Fortaleza"
         self.fmt = fmt
         self.FORMATS = {
             logging.DEBUG: self.grey + self.fmt + self.reset,
@@ -31,8 +23,6 @@ class CustomFormatter(logging.Formatter):
             logging.ERROR: self.red + self.fmt + self.reset,
             logging.CRITICAL: self.bold_red + self.fmt + self.reset
         }
-
-        super(CustomFormatter, self).__init__(fmt=fmt, datefmt=datefmt)
 
     def format(self, record):
         log_fmt = self.FORMATS.get(record.levelno)
