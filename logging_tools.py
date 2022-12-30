@@ -1,7 +1,8 @@
 import logging
-import datetime
+from datetime import datetime, tzinfo
 
-from get_time import TZ
+import pytz
+import tzlocal
 
 
 class CustomFormatter(logging.Formatter):
@@ -14,8 +15,15 @@ class CustomFormatter(logging.Formatter):
     bold_red = '\x1b[31;1m'
     reset = '\x1b[0m'
 
-    def __init__(self, fmt):
-        super().__init__()
+    def __init__(self, fmt=None, datefmt=None, tz=None):
+
+        if tz is None:
+            self.tz = tzlocal.get_localzone()
+        elif isinstance(tz, tzinfo):
+            self.tz = tz
+        else:
+            self.tz = pytz.timezone(tz)
+
         self.fmt = fmt
         self.FORMATS = {
             logging.DEBUG: self.grey + self.fmt + self.reset,
@@ -25,12 +33,25 @@ class CustomFormatter(logging.Formatter):
             logging.CRITICAL: self.bold_red + self.fmt + self.reset
         }
 
-        self.converter = datetime.datetime.now(TZ).timetuple()
+        super(CustomFormatter, self).__init__(fmt=fmt, datefmt=datefmt)
 
     def format(self, record):
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
+
+    def converter(self, timestamp):
+        # logging.Formatter uses time.localtime here and returns a time.struct_time
+        return datetime.fromtimestamp(timestamp, self.tz)
+
+    def formatTime(self, record, datefmt=None):
+        # Parent implementation expects the time record to be some sort of 9-item
+        # sequence (e.g. time.struct_time).  Override impl to use datetime.strftime
+        # instead of time.strftime to bypass this limitation.
+        if datefmt is None:
+            datefmt = '%Y-%m-%d %H:%M:%S%z'
+        converted = self.converter(record.created)
+        return converted.strftime(datefmt)
 
 
 logger = logging.getLogger(__name__)
