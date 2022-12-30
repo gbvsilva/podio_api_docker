@@ -8,7 +8,7 @@ from pypodio2.transport import TransportException
 
 from podio_tools import handlingPodioError
 from telegram_tools import sendToBot
-from logging_tools import logger, log_stream
+from logging_tools import logger
 
 # Rotina para a criação inicial do banco de dados Postgres.
 # Recebe a variável autenticada na API Podio.

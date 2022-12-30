@@ -1,5 +1,4 @@
 import logging
-from io import StringIO
 
 
 class CustomFormatter(logging.Formatter):

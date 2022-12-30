@@ -8,7 +8,7 @@ from pypodio2.transport import TransportException
 from podio_tools import handlingPodioError, getFieldValues
 
 from telegram_tools import sendToBot
-from logging_tools import logger, log_stream
+from logging_tools import logger
 
 # Inserindo ou atualizando dados no Banco. Retorna 0 se nao ocorreram erros
 # Retorna 1 caso precise refazer a estrutura do Banco, excluindo alguma(s) tabela(s).
