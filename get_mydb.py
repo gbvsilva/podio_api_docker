@@ -4,6 +4,8 @@ import mysql.connector
 from get_time import getHour
 from telegram_tools import sendToBot
 
+from logging_tools import logger
+
 def getDB():
     try:
         mydb = mysql.connector.connect(
@@ -14,9 +16,9 @@ def getDB():
                 )
     except mysql.connector.Error as err:
         # Inatividade do banco ou credenciais inválidas
-        message = f"{getHour()} -> Erro inesperado no acesso inicial ao BD. Terminando o programa. {err}"
-        print(message)
-        sendToBot(message)
+        message = f"Erro inesperado no acesso inicial ao BD. Terminando o programa. {err}"
+        logger.error(message)
+        sendToBot(f'{getHour()} -> {message}')
         exit(1)
     else:
         return mydb
