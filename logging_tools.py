@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, tzinfo
+from datetime import datetime
 
 
 class CustomFormatter(logging.Formatter):

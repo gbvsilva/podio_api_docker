@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import datetime
 from get_time import getHour
 
@@ -26,17 +28,16 @@ def insertItems(podio, apps_ids):
             tableName = spaceName+"__"+appName
 
             if (tableName,) in tables:
-                tableLabels = []
+                # Dados para preencher a tabela
+                tableData = OrderedDict()
                 for field in appInfo.get('fields'):
-                    if field['status'] == "active":
-                        label = field['external_id']
-                        label = label[:40]
-                        tableLabels.append("\"" + label + "\"")
+                    if field['status'] == 'active':
+                        tableData[field['external_id'][:40]] = "''"
 
-                # Fazendo requisicoes percorrendo todos os dados existentes
+                # Fazendo requisições percorrendo todos os dados existentes.
                 # Para isso define-se o limite de cada consulta como 500 (o maximo) e o offset
                 # Ou seja, a cada passo novo (offset) items são requisitados, com base na
-                # quantidade de items obtidos na última iteração
+                # quantidade de items obtidos na última iteração.
                 numberOfItems = podio.Application.get_items(appInfo.get('app_id'))['total']
                 try:
                     for step in range(0, numberOfItems, 500):
@@ -63,19 +64,12 @@ def insertItems(podio, apps_ids):
                             if cursor.rowcount == 0 or last_event_on_podio > last_event_on_db:
                                 query = [f"INSERT INTO podio.{tableName}", " VALUES", "("]
                                 query.extend([f"'{str(item['item_id'])}','{item['created_on']}','{last_event_on_podio}',"])
-                                fields = [x for x in item['fields'] if f"\"{x['external_id'][:40]}\"" in tableLabels]
-                                # Fazendo a comparação entre os campos existentes e os preenchidos
-                                # Caso o campo esteja em branco no Podio, preencher com '?'
-                                j = 0
-                                for i in range(len(tableLabels)):
-                                    if j < len(fields) and str("\"" + fields[j]['external_id'][:40] + "\"") == tableLabels[i]:
-                                        values = getFieldValues(fields[j])
-                                        j += 1
-                                    else:
-                                        values = "''"
-                                    query.append(values)
-                                    query.append(",")
-                                query.pop()
+
+                                # Atualizando os dados com o que é obtido do Podio
+                                for field in item.get('fields'):
+                                    tableData.update({field['external_id'][:40]: getFieldValues(field)})
+
+                                query.extend(','.join(tableData.values()))
                                 query.append(")")
                                 try:
                                     cursor.execute("".join(query))
