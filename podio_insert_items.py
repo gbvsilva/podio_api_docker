@@ -34,7 +34,7 @@ def insertItems(podio, apps_ids):
                     if field['status'] == 'active':
                         tableData[field['external_id'][:40]] = "''"
 
-                # Fazendo requisições percorrendo todos os dados existentes.
+                # Fazendo requisicoes percorrendo todos os dados existentes.
                 # Para isso define-se o limite de cada consulta como 500 (o maximo) e o offset
                 # Ou seja, a cada passo novo (offset) items são requisitados, com base na
                 # quantidade de items obtidos na última iteração.
@@ -72,9 +72,9 @@ def insertItems(podio, apps_ids):
                                 query.extend(','.join(tableData.values()))
                                 query.append(")")
                                 try:
-                                    cursor.execute("".join(query))
+                                    message = ''.join(query)
+                                    cursor.execute(message)
                                     hour = getHour()
-                                    message = f"{''.join(query)}"
                                     logger.info(message)
                                     sendToBot(f'{hour} -> {message}')
                                     mydb.commit()

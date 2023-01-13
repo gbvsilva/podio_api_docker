@@ -42,9 +42,9 @@ def createTables(podio, apps_ids):
                         query.append(f", \"{label}\" TEXT")
                 query.append(")")
 
-                cursor.execute("".join(query))
+                message = ''.join(query)
+                cursor.execute(message)
                 hour = getHour()
-                message = f"{''.join(query)}"
                 mydb.commit()
                 logger.info(message)
                 sendToBot(f'{hour} -> {message}')
