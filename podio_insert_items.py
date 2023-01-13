@@ -72,9 +72,9 @@ def insertItems(podio, apps_ids):
                                 query.extend(','.join(tableData.values()))
                                 query.append(")")
                                 try:
-                                    cursor.execute("".join(query))
+                                    message = ''.join(query)
+                                    cursor.execute(message)
                                     hour = getHour()
-                                    message = f"{''.join(query)}"
                                     logger.info(message)
                                     sendToBot(f'{hour} -> {message}')
                                     mydb.commit()
