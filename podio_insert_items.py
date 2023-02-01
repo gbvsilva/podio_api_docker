@@ -56,7 +56,7 @@ def insertItems(podio, apps_ids):
 
                                 if last_event_on_podio > last_event_on_db:
                                     hour = getHour()
-                                    message = f"Item com ID={item['item_id']} atualizado no Podio. Excluindo-o da tabela '{tableName}' e inserindo-o a seguir."
+                                    message = f"Item de ID={item['item_id']} e URL_ID={item['app_item_id']} atualizado no Podio. Excluindo-o da tabela '{tableName}' e inserindo-o a seguir."
                                     logger.info(message)
                                     sendToBot(f'{hour} -> {message}')
                                     cursor.execute(f"DELETE FROM podio.{tableName} WHERE id='{item['item_id']}'")
@@ -74,7 +74,7 @@ def insertItems(podio, apps_ids):
                                 query.extend(','.join(tableData.values()))
                                 query.append(")")
                                 try:
-                                    message = f"Inserindo item `{item['item_id']}` na tabela `{tableName}`"
+                                    message = f"Inserindo item de ID={item['item_id']} e URL_ID={item['app_item_id']} na tabela `{tableName}`"
                                     cursor.execute(''.join(query))
                                     hour = getHour()
                                     logger.info(message)
