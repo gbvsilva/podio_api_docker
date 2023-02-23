@@ -1,4 +1,6 @@
 from os import environ as env
+import sys
+
 import mysql.connector
 
 from get_time import getHour
@@ -19,6 +21,6 @@ def getDB():
         message = f"Erro inesperado no acesso inicial ao BD. Terminando o programa. {err}"
         logger.error(message)
         sendToBot(f'{getHour()} -> {message}')
-        exit(1)
+        sys.exit()
     else:
         return mydb
