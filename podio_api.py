@@ -1,4 +1,6 @@
 from os import environ as env
+import sys
+
 # Usando a biblioteca de manipulação da API do Podio.
 from pypodio2 import api
 from pypodio2.transport import TransportException
@@ -43,7 +45,7 @@ if __name__ == '__main__':
             message = "Terminando o programa."
             logger.info(message)
             sendToBot(message)
-        exit(1)
+        sys.exit()
     else:
         cycle = 1
         while True:
@@ -142,5 +144,5 @@ if __name__ == '__main__':
                 message = f"Erro inesperado na criação/atualização do BD. Terminando o programa."
                 logger.error(message)
                 sendToBot(message)
-                exit(1)
+                sys.exit()
             cycle += 1
