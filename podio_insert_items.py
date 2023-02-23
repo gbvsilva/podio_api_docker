@@ -16,7 +16,11 @@ from logging_tools import logger
 # Retorna 1 caso precise refazer a estrutura do Banco, excluindo alguma(s) tabela(s).
 # Retorna 2 caso seja atingido o limite de requisições por hora
 def insertItems(podio, apps_ids):
-    mydb = getDB()
+    # Acessando o BD. Esperando conexão com sucesso...
+    mydb = None
+    while not mydb:
+        mydb = getDB()
+
     cursor = mydb.cursor()
     for app_id in apps_ids:
         try:

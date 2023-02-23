@@ -13,8 +13,11 @@ from logging_tools import logger
 # Rotina para a criação inicial do banco de dados Postgres.
 # Recebe a variável autenticada na API Podio.
 def createTables(podio, apps_ids):
-    # Acessando o BD
-    mydb = getDB()
+    # Acessando o BD. Esperando conexão com sucesso...
+    mydb = None
+    while not mydb:
+        mydb = getDB()
+
     cursor = mydb.cursor()
     for app_id in apps_ids:
         # Criando as tabelas para cada database criado acima

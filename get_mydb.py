@@ -20,9 +20,9 @@ def getDB():
         mydb.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     except psycopg2.Error as err:
         # Não alcance, inatividade do banco ou credenciais inválidas
-        message = f"Erro inesperado no acesso inicial ao BD. Terminando o programa. {err}"
-        logger.error(message)
-        sendToBot(f'{getHour()} -> {message}')
-        sys.exit()
+        #message = f"Erro inesperado no acesso inicial ao BD. Terminando o programa. {err}"
+        #logger.error(message)
+        #sendToBot(f'{getHour()} -> {message}')
+        pass
     else:
         return mydb
