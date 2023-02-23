@@ -10,7 +10,7 @@ RUN apk update
 RUN apk add --no-cache py3-pip python3-dev git
 
 # To install requirements.txt
-RUN pip install --no-cache wheel
+RUN pip install --no-cache-dir wheel
 
 # Installing Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
