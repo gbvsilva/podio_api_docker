@@ -7,7 +7,7 @@ from pypodio2.transport import TransportException
 
 import time
 
-from get_time import getHour, timer
+from get_time import getHour
 from podio_create_tables import createTables
 from podio_insert_items import insertItems
 from podio_tools import handlingPodioError
@@ -61,7 +61,7 @@ if __name__ == '__main__':
                     message = f"Esperando a hora seguinte. Até às {hour}"
                     logger.info(message)
                     sendToBot(message)
-                    timer(3600)
+                    time.sleep(3600)
                     try:
                         podio = api.OAuthClient(
                             client_id,
@@ -79,7 +79,7 @@ if __name__ == '__main__':
                     message = f"Esperando as próximas {timeOffset/3600}hs. Até às {hours}"
                     logger.info(message)
                     sendToBot(message)
-                    timer(timeOffset)
+                    time.sleep(timeOffset)
                     try:
                         podio = api.OAuthClient(
                             client_id,
@@ -112,7 +112,7 @@ if __name__ == '__main__':
                 message = f"Esperando a hora seguinte às {hour}"
                 logger.info(message)
                 sendToBot(message)
-                timer(3600)
+                time.sleep(3600)
                 try:
                     podio = api.OAuthClient(
                         client_id,
