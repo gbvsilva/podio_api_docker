@@ -7,7 +7,11 @@ WORKDIR /opt/podio_api
 
 # Installing dependencies
 RUN apk update
-RUN apk add --no-cache py3-pip python3-dev git
+RUN apk add --no-cache tzdata py3-pip python3-dev git
+
+# Set the timezone
+ENV TZ=America/Fortaleza
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # To install requirements.txt
 RUN pip install --no-cache-dir wheel
