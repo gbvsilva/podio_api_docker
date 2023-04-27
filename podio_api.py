@@ -11,7 +11,7 @@ from get_time import getHour
 from podio_create_tables import createTables
 from podio_insert_items import insertItems
 from podio_tools import handlingPodioError
-from telegram_tools import sendToBot
+# from telegram_tools import sendToBot
 
 from logging_tools import logger
 
@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     message = "==== PODIO API PYTHON SCRIPT (PostgreSQL) ===="
     print(message)
-    sendToBot(message)
+    # sendToBot(message)
     # Autenticando na plataforma do Podio com as credenciais recuperadas acima
     try:
         podio = api.OAuthClient(
@@ -44,14 +44,14 @@ if __name__ == '__main__':
         if handled == 'status_400':
             message = "Terminando o programa."
             logger.info(message)
-            sendToBot(message)
+            # sendToBot(message)
         sys.exit()
     else:
         cycle = 1
         while True:
             message = f"==== Ciclo {cycle} ===="
             logger.info(message)
-            sendToBot(message)
+            # sendToBot(message)
             creation = createTables(podio, apps_ids)
             if creation == 0:
                 insertion = insertItems(podio, apps_ids)
@@ -60,7 +60,7 @@ if __name__ == '__main__':
                     hour = getHour(hours=1)
                     message = f"Esperando a hora seguinte. Até às {hour}"
                     logger.info(message)
-                    sendToBot(message)
+                    # sendToBot(message)
                     time.sleep(3600)
                     try:
                         podio = api.OAuthClient(
@@ -72,13 +72,13 @@ if __name__ == '__main__':
                     except:
                         message = 'Erro na obtenção do novo cliente Podio! Tentando novamente...'
                         logger.error(message)
-                        sendToBot(message)
+                        # sendToBot(message)
                 elif insertion == 0:
                     # Nesse caso foi criado o primeiro snapshot do Podio no BD. Próxima iteração no dia seguinte
                     hours = getHour(seconds=timeOffset)
                     message = f"Esperando as próximas {timeOffset/3600}hs. Até às {hours}"
                     logger.info(message)
-                    sendToBot(message)
+                    # sendToBot(message)
                     time.sleep(timeOffset)
                     try:
                         podio = api.OAuthClient(
@@ -90,11 +90,11 @@ if __name__ == '__main__':
                     except:
                         message = 'Erro na obtenção do novo cliente Podio! Tentando novamente...'
                         logger.error(message)
-                        sendToBot(message)
+                        # sendToBot(message)
                 else:
                     message = "Tentando novamente..."
                     logger.info(message)
-                    sendToBot(message)
+                    # sendToBot(message)
                     try:
                         podio = api.OAuthClient(
                             client_id,
@@ -105,13 +105,13 @@ if __name__ == '__main__':
                     except:
                         message = 'Erro na obtenção do novo cliente Podio! Tentando novamente...'
                         logger.error(message)
-                        sendToBot(message)
+                        # sendToBot(message)
                     #time.sleep(1)
             elif creation == 2:
                 hour = getHour(hours=1)
                 message = f"Esperando a hora seguinte às {hour}"
                 logger.info(message)
-                sendToBot(message)
+                # sendToBot(message)
                 time.sleep(3600)
                 try:
                     podio = api.OAuthClient(
@@ -123,11 +123,11 @@ if __name__ == '__main__':
                 except:
                     message = 'Erro na obtenção do novo cliente Podio! Tentando novamente...'
                     logger.error(message)
-                    sendToBot(message)
+                    # sendToBot(message)
             elif creation == 3:
                 message = "Tentando novamente..."
                 logger.info(message)
-                sendToBot(message)
+                # sendToBot(message)
                 try:
                     podio = api.OAuthClient(
                         client_id,
@@ -138,11 +138,11 @@ if __name__ == '__main__':
                 except:
                     message = 'Erro na obtenção do novo cliente Podio! Tentando novamente...'
                     logger.error(message)
-                    sendToBot(message)
+                    # sendToBot(message)
                 #time.sleep(1)
             else:
                 message = f"Erro inesperado na criação/atualização do BD. Terminando o programa."
                 logger.error(message)
-                sendToBot(message)
+                # sendToBot(message)
                 sys.exit()
             cycle += 1

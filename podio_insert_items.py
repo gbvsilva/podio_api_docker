@@ -9,7 +9,7 @@ from get_mydb import getDB
 from pypodio2.transport import TransportException
 from podio_tools import handlingPodioError, getFieldValues
 
-from telegram_tools import sendToBot
+# from telegram_tools import sendToBot
 from logging_tools import logger
 
 # Inserindo ou atualizando dados no Banco. Retorna 0 se nao ocorreram erros
@@ -62,7 +62,7 @@ def insertItems(podio, apps_ids):
                                     hour = getHour()
                                     message = f"Item de ID={item['item_id']} e URL_ID={item['app_item_id']} atualizado no Podio. Excluindo-o da tabela '{tableName}' e inserindo-o a seguir."
                                     logger.info(message)
-                                    sendToBot(f'{hour} -> {message}')
+                                    # sendToBot(f'{hour} -> {message}')
                                     cursor.execute(f"DELETE FROM podio.{tableName} WHERE id='{item['item_id']}'")
 
                             if cursor.rowcount == 0 or last_event_on_podio > last_event_on_db:
@@ -82,13 +82,13 @@ def insertItems(podio, apps_ids):
                                     cursor.execute(''.join(query))
                                     hour = getHour()
                                     logger.info(message)
-                                    sendToBot(f'{hour} -> {message}')
+                                    # sendToBot(f'{hour} -> {message}')
                                     mydb.commit()
                                 except dbError as err:
                                     hour = getHour()
                                     message = f"Aplicativo alterado. Excluindo a tabela \"{tableName}\". {err}"
                                     logger.info(message)
-                                    sendToBot(f'{hour} -> {message}')
+                                    # sendToBot(f'{hour} -> {message}')
                                     cursor.execute(f"DROP TABLE podio.{tableName}")
                                     return 1
                 except TransportException as err:

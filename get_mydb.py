@@ -5,7 +5,7 @@ import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 from get_time import getHour
-from telegram_tools import sendToBot
+# from telegram_tools import sendToBot
 
 from logging_tools import logger
 
@@ -22,7 +22,7 @@ def getDB():
         # Não alcance, inatividade do banco ou credenciais inválidas
         #message = f"Erro inesperado no acesso inicial ao BD. Terminando o programa. {err}"
         #logger.error(message)
-        #sendToBot(f'{getHour()} -> {message}')
+        ## sendToBot(f'{getHour()} -> {message}')
         pass
     else:
         return mydb
