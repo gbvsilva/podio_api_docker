@@ -71,7 +71,7 @@ def insertItems(podio, apps_ids):
                                 # Atualizando os dados com o que é obtido do Podio
                                 for field in item.get('fields'):
                                     # O item ainda pode trazer informações antigas não mais usadas. Daí a checagem.
-                                    if field['external_id'][:40] in tableData:
+                                    if field['external_id'][:40] in tableDataModel:
                                         newItem.update({field['external_id'][:40]: getFieldValues(field)})
 
                                 query.extend(','.join(newItem.values()))
