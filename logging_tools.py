@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 import logging
+=======
+"""Auxiliary tools for logging"""
+import logging
+from datetime import datetime
+>>>>>>> postgres
 
 
 class CustomFormatter(logging.Formatter):
@@ -13,6 +19,7 @@ class CustomFormatter(logging.Formatter):
 
     def __init__(self, fmt):
         super().__init__()
+        self.tz = "America/Fortaleza"
         self.fmt = fmt
         self.FORMATS = {
             logging.DEBUG: self.grey + self.fmt + self.reset,
@@ -26,6 +33,20 @@ class CustomFormatter(logging.Formatter):
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
+
+    def converter(self, timestamp):
+        # logging.Formatter uses time.localtime here and returns a time.struct_time
+        return datetime.fromtimestamp(timestamp, self.tz)
+
+    def formatTime(self, record, datefmt=None):
+        # Parent implementation expects the time record to be some sort of 9-item
+        # sequence (e.g. time.struct_time).  Override impl to use datetime.strftime
+        # instead of time.strftime to bypass this limitation.
+        if datefmt is None:
+            datefmt = '%Y-%m-%d %H:%M:%S%z'
+        converted = self.converter(record.created)
+        return converted.strftime(datefmt)
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -44,4 +65,7 @@ stdout_handler.setFormatter(CustomFormatter(fmt))
 
 # Add handler to the logger
 logger.addHandler(stdout_handler)
+<<<<<<< HEAD
 
+=======
+>>>>>>> postgres
