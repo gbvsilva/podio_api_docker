@@ -29,6 +29,9 @@ def create_tables(podio: Client, apps_ids: list):
         mydb = get_db()
 
     cursor = mydb.cursor()
+    cursor.execute("CREATE DATABASE IF NOT EXISTS podio")
+    cursor.execute("USE podio")
+
     for app_id in apps_ids:
 
         # Creating database tables for each Podio app
@@ -36,9 +39,11 @@ def create_tables(podio: Client, apps_ids: list):
             app_info = podio.Application.find(app_id)
             space_name = podio.Space.find(app_info.get('space_id')).get('url_label').replace('-', '_')
             app_name = app_info.get('url_label').replace('-', '_')
+            table_name = space_name + "__" + app_name
+
             cursor.execute("SHOW TABLES")
             tables = cursor.fetchall()
-            table_name = space_name + "__" + app_name
+
             if app_info.get('status') == "active" and (table_name,) not in tables:
                 query = ["CREATE TABLE " + table_name, "("]
                 query.append("`id` VARCHAR(255) PRIMARY KEY NOT NULL")
@@ -48,10 +53,14 @@ def create_tables(podio: Client, apps_ids: list):
                 for field in app_info.get('fields'):
                     if field['status'] == "active":
                         label = field['external_id']
-                        # Alguns campos possuem nomes muito grandes
+
+                        # Some fields have big names (external_id)
                         label = label[:40]
+
+                        # Some Podio apps have multiple `id` fields, so we need to rename them
                         if "id" in label:
                             label += str("".join(query).lower().count(f"`id")+1)
+
                         query.append(f", `{label}` TEXT")
                 query.append(")")
 
@@ -61,13 +70,15 @@ def create_tables(podio: Client, apps_ids: list):
                 #mydb.commit()
                 logger.info(message)
                 send_to_bot(f'{hour} -> {message}')
-            # Caso tabela esteja inativa no Podio, excluí-la
+
+            # If the app is inactive on Podio, delete its respescive table
             elif app_info.get('status') != "active" and (table_name,) in tables:
                 cursor.execute(f"DROP TABLE {table_name}")
                 hour = get_hour()
                 message = f"Tabela inativa `{table_name}` excluída."
                 logger.info(message)
                 send_to_bot(f'{hour} -> {message}')
+
         except dbError as err:
             hour = get_hour()
             message = f"Erro no acesso ao BD. {err}"
@@ -81,5 +92,6 @@ def create_tables(podio: Client, apps_ids: list):
                 return 2
             if handled == 'status_400' or handled == 'not_known_yet':
                 continue
+
     mydb.close()
     return 0
