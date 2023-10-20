@@ -1,10 +1,6 @@
-<<<<<<< HEAD
-import logging
-=======
 """Auxiliary tools for logging"""
 import logging
 from datetime import datetime
->>>>>>> postgres
 
 
 class CustomFormatter(logging.Formatter):
@@ -65,7 +61,3 @@ stdout_handler.setFormatter(CustomFormatter(fmt))
 
 # Add handler to the logger
 logger.addHandler(stdout_handler)
-<<<<<<< HEAD
-
-=======
->>>>>>> postgres
