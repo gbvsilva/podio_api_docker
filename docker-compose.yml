@@ -20,7 +20,7 @@ services:
       context: ./
       dockerfile: Dockerfile
     restart: always
-    image: gbvsilva/podio-api
+    image: gbvsilva/podio_api
     env_file:
       - "${PODIO_API_ENVFILE}"
       - "${DATABASE_ENVFILE}"
