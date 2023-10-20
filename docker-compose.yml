@@ -6,8 +6,8 @@ services:
   # App Container
   # ------------------------------------
 
-  podio_api-mysql:
-    container_name: podio_api-mysql
+  podio_api:
+    container_name: podio_api
     deploy:
       resources:
         reservations:
@@ -15,15 +15,13 @@ services:
           memory: 1000M
         limits:
           cpus: '1'
-          memory: 3500M
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    restart: on-failure:3
-    image: gbvsilva/podio-api:mysql
+          memory: 1000M
+    restart: always
+    image: gbvsilva/podio_api
     env_file:
-      - '/home/graco.silva/git/env-files/podio_api/bi.env'
-      - '/home/graco.silva/git/env-files/databases/graco_local.env'
-      - '/home/graco.silva/git/env-files/misc/local.env'
-      - '/home/graco.silva/git/env-files/telegram/podio_api_aux_bot.env'
-    network_mode: host
+      - "${PODIO_API_ENVFILE}"
+      - "${DATABASE_ENVFILE}"
+      - "${MISC_ENVFILE}"
+      - "${TELEGRAM_ENVFILE}"
+    volumes:
+      - ./:/opt/podio_api
