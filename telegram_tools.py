@@ -1,15 +1,22 @@
+"""Tools for sending messages to Telegram"""
+from os import getenv
 import requests
-from get_time import getHour
-from os import environ as env
 
 from logging_tools import logger
 
-# Send to pairs of Telegram auth tokens and chat IDs
-def sendToBot(message):
-    for auth_token, chat_id in zip(env.get('TELEGRAM_BOT_AUTH_TOKENS').split(','), env.get('TELEGRAM_BOT_CHAT_IDS').split(',')):
+
+def send_to_bot(message: str):
+    """Try sending a message via Telegram bots to channels.
+
+    Args:
+        message (str): Message to be sent.
+    """
+    for auth_token, chat_id in zip(getenv('TELEGRAM_BOT_AUTH_TOKENS').split(','), getenv('TELEGRAM_BOT_CHAT_IDS').split(',')):
         try:
-            requests.post(f"https://api.telegram.org/bot{auth_token}/sendMessage",
-                            data={'text': message, 'chat_id': chat_id})
+            response = requests.post(f"https://api.telegram.org/bot{auth_token}/sendMessage",
+                data={'text': message, 'chat_id': chat_id}, timeout=40
+        )
+            if response.status_code != 200:
+                logger.error("Falha no post para o Telegram. HTTP `%s`. Detalhes: %s", response.status_code, response.text)
         except requests.exceptions.ConnectionError as err:
-            message = f"Erro no post para o Telegram. {err}"
-            logger.error(message)
+            logger.error("Erro no post para o Telegram. Detalhes: %s", str(err))

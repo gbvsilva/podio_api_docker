@@ -1,3 +1,4 @@
+"""Auxiliary tools for logging"""
 import logging
 from datetime import datetime
 
@@ -60,4 +61,3 @@ stdout_handler.setFormatter(CustomFormatter(fmt))
 
 # Add handler to the logger
 logger.addHandler(stdout_handler)
-

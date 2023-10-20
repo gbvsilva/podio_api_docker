@@ -1,10 +1,9 @@
 import datetime
 from os import environ as env
-import time
 
 TZ = datetime.timezone(datetime.timedelta(hours=int(env.get('TIMEZONE_OFFSET'))))
 
-def getHour(**timedelta):
+def get_hour(**timedelta):
     if timedelta:
         hours = timedelta.get('hours', 0)
         minutes = timedelta.get('minutes', 0)

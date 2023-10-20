@@ -22,6 +22,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Cleaning cache
 RUN apk del git && rm -rf /var/cache/apk/*
 
+USER podio
+
 # Setting entrypoint
-CMD ["-u", "/opt/podio_api/podio_api.py"]
+CMD ["-u", "/opt/podio_api/main.py"]
 ENTRYPOINT [ "python3" ]
