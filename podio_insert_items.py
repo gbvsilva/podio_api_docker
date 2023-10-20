@@ -104,22 +104,24 @@ def insert_items(podio: Client, apps_ids: list):
                                     logger.info(message)
                                     # send_to_bot(f'{hour} -> {message}')
                                     cursor.execute(f"DROP TABLE podio.{table_name}")
-                                    return 1
+                                    raise dbError('Tabela excluída com sucesso!') from err
+
                 except TransportException as err:
                     mydb.close()
                     handled = handling_podio_error(err)
                     if handled == 'rate_limit':
                         return 1
-                    if handled == 'status_504' or handled == 'status_400' or handled == 'token_expired':
-                        return 2
+                    return 2
+
+                except dbError as err:
+                    continue
 
         except TransportException as err:
             mydb.close()
             handled = handling_podio_error(err)
             if handled == 'rate_limit':
                 return 1
-            if handled == 'status_504' or handled == 'status_400' or handled == 'token_expired':
-                return 2
-            continue
+            return 2
+
     mydb.close()
     return 0
