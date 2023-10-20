@@ -61,7 +61,3 @@ stdout_handler.setFormatter(CustomFormatter(fmt))
 
 # Add handler to the logger
 logger.addHandler(stdout_handler)
-<<<<<<< HEAD
-
-=======
->>>>>>> postgres
