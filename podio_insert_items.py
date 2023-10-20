@@ -123,5 +123,6 @@ def insert_items(podio: Client, apps_ids: list):
             if handled == 'rate_limit':
                 return 1
             return 2
+
     mydb.close()
     return 0
