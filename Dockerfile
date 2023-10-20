@@ -22,7 +22,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Cleaning cache
 RUN apk del git && rm -rf /var/cache/apk/*
 
-RUN groupadd -r podio && useradd -r -g podio podio
+RUN addgroup -S podio && adduser -S -G podio podio
 USER podio
 
 # Setting entrypoint
