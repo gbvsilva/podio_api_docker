@@ -6,8 +6,8 @@ services:
   # App Container
   # ------------------------------------
 
-  podio_api-postgres:
-    container_name: podio_api-postgres
+  podio_api:
+    container_name: podio_api
     deploy:
       resources:
         reservations:
@@ -20,7 +20,7 @@ services:
       context: ./
       dockerfile: Dockerfile
     restart: always
-    image: gbvsilva/podio-api:postgres
+    image: gbvsilva/podio-api
     env_file:
       - "${PODIO_API_ENVFILE}"
       - "${DATABASE_ENVFILE}"
