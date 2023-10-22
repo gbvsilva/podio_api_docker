@@ -49,10 +49,8 @@ def create_tables(podio: Client, apps_ids: list):
                 for field in app_info.get('fields'):
                     if field['status'] == "active":
                         label = field['external_id']
-                        # Alguns campos possuem nomes muito grandes
+                        # Some field names are too large
                         label = label[:40]
-                        if "id" in label:
-                            label += str("".join(query).lower().count(f"\"id")+1)
                         query.append(f", \"{label}\" TEXT")
                 query.append(")")
 
