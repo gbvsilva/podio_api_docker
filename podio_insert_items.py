@@ -81,7 +81,7 @@ def insert_items(podio: Client, apps_ids: list):
 
                             if cursor.rowcount == 0 or last_event_on_podio > last_event_on_db:
                                 query = [f"INSERT INTO podio.{table_name}", " VALUES", "("]
-                                query.extend([f"'{str(item['item_id'])}','{item['created_on']}','{last_event_on_podio}',"])
+                                query.extend([f"'{str(item['item_id'])}', '{str(item['app_item_id'])}','{item['created_on']}','{last_event_on_podio}',"])
 
                                 # Update new database item data with the item data from Podio
                                 for field in item.get('fields'):
