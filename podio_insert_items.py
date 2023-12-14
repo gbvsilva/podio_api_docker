@@ -66,22 +66,20 @@ def insert_items(podio: Client, apps_ids: list):
                             # New item being the copy of the model
                             new_item = table_data_model.copy()
 
-                            cursor.execute(f"SELECT \"last_event_on\" FROM podio.{table_name} WHERE id='{item['item_id']}'")
-                            last_event_on_podio = datetime.datetime.strptime(item['last_event_on'],
-                                                    "%Y-%m-%d %H:%M:%S")
-                            if cursor.rowcount > 0:
+                            last_event_on_podio = datetime.datetime.strptime(item['last_event_on'], "%Y-%m-%d %H:%M:%S")
+                            cursor.execute(f"SELECT last_event_on FROM podio.{table_name} WHERE item_id='{item['item_id']}'")
+                            if cursor.rowcount:
+
                                 last_event_on_db = cursor.fetchone()[0]
 
                                 if last_event_on_podio > last_event_on_db:
-                                    hour = get_hour()
                                     message = f"Item de ID={item['item_id']} e URL_ID={item['app_item_id']} atualizado no Podio. Excluindo-o da tabela '{table_name}' e inserindo-o a seguir."
                                     logger.info(message)
-                                    # send_to_bot(f'{hour} -> {message}')
-                                    cursor.execute(f"DELETE FROM podio.{table_name} WHERE id='{item['item_id']}'")
+                                    cursor.execute(f"DELETE FROM podio.{table_name} WHERE item_id='{item['item_id']}'")
 
-                            if cursor.rowcount == 0 or last_event_on_podio > last_event_on_db:
+                            if not cursor.rowcount or last_event_on_podio > last_event_on_db:
                                 query = [f"INSERT INTO podio.{table_name}", " VALUES", "("]
-                                query.extend([f"'{str(item['item_id'])}', '{str(item['app_item_id'])}','{item['created_on']}','{last_event_on_podio}',"])
+                                query.extend([f"'{str(item['item_id'])}','{str(item['app_item_id'])}','{item['created_on']}','{last_event_on_podio}',"])
 
                                 # Update new database item data with the item data from Podio
                                 for field in item.get('fields'):
