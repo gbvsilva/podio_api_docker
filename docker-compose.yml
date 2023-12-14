@@ -16,8 +16,11 @@ services:
         limits:
           cpus: '1'
           memory: 1000M
-    restart: always
+    build:
+      context: ./
+      dockerfile: Dockerfile
     image: gbvsilva/podio_api
+    restart: always
     env_file:
       - "${PODIO_API_ENVFILE}"
       - "${DATABASE_ENVFILE}"
